@@ -1,0 +1,3231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Phatthana Lab : ตะลุยโลกพอลิเมอร์ (5E Active Learning)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Kanit & Prompt for friendly, legible Thai UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================================
+           Custom Cartoon Styles & Animations for Phatthana Lab
+           ========================================================= */
+        :root {
+            --font-display: 'Prompt', 'Kanit', sans-serif;
+            --font-body: 'Kanit', sans-serif;
+        }
+
+        html, body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fefce8 100%);
+            min-height: 100vh;
+            color: #1e293b;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        h1, h2, h3, h4, .font-cartoon {
+            font-family: var(--font-display);
+        }
+
+        /* Hide scrollbar on horizontal nav bar while allowing smooth touch swipe */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Cute Cartoon Card & Tactile Button Styles */
+        .cartoon-card {
+            background: #ffffff;
+            border: 3px solid #1e293b;
+            border-radius: 1.5rem;
+            box-shadow: 0 6px 0 #cbd5e1;
+        }
+
+        .cartoon-btn {
+            border: 2.5px solid #1e293b;
+            border-radius: 1rem;
+            box-shadow: 0 4px 0 #1e293b;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .cartoon-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #1e293b;
+        }
+
+        .cartoon-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #1e293b;
+        }
+
+        .cartoon-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        /* Active Tab Styling */
+        .tab-active {
+            background-color: #fde047 !important;
+            color: #1e293b !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #1e293b;
+        }
+
+        /* Custom Cute Range Slider for Temperature */
+        input[type="range"].temp-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 16px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #38bdf8 0%, #fbbf24 50%, #ef4444 100%);
+            border: 2.5px solid #1e293b;
+            outline: none;
+        }
+
+        input[type="range"].temp-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #1e293b;
+            box-shadow: 0 3px 0 #1e293b;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"].temp-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type="range"].temp-slider::-moz-range-thumb {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #1e293b;
+            box-shadow: 0 3px 0 #1e293b;
+            cursor: pointer;
+        }
+
+        /* Floating & Pulse Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: floatSlow 3.2s ease-in-out infinite;
+        }
+
+        @keyframes readyPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 0 #1e293b, 0 0 0 0 rgba(249, 115, 22, 0.5); }
+            50% { transform: scale(1.025); box-shadow: 0 6px 0 #1e293b, 0 0 0 8px rgba(249, 115, 22, 0); }
+        }
+        .animate-ready-pulse {
+            animation: readyPulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.94); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Canvas Containers */
+        .sim-tank {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            border: 3px solid #1e293b;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 30%, #ffffff 0%, #f1f5f9 100%);
+            box-shadow: inset 0 4px 12px rgba(15, 23, 42, 0.08);
+            transition: height 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .sim-tank {
+                height: 410px;
+            }
+            .sim-tank.projector-tall {
+                height: 520px;
+            }
+        }
+
+        .builder-tank {
+            position: relative;
+            width: 100%;
+            height: 370px;
+            border: 3px solid #1e293b;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            background-color: #ffffff;
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            box-shadow: inset 0 4px 12px rgba(15, 23, 42, 0.06);
+            touch-action: none; /* Prevent screen scroll while dragging monomers on mobile/iPad */
+        }
+
+        @media (min-width: 768px) {
+            .builder-tank {
+                height: 430px;
+            }
+        }
+
+        canvas#polymerCanvas, canvas#builderCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Quiz Celebration Confetti Animation */
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(280px) rotate(540deg); opacity: 0; }
+        }
+        .confetti-piece {
+            position: absolute;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            border: 1.5px solid #1e293b;
+            pointer-events: none;
+            animation: confettiFall 1.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        /* Progress Bar Animation */
+        .prop-bar-fill {
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Recycle Bin Drop Target Highlight */
+        .bin-drop-active {
+            transform: scale(1.03);
+            box-shadow: 0 0 0 4px #fde047, 0 6px 0 #1e293b;
+        }
+    </style>
+</head>
+<body class="pb-12">
+
+    <!-- =========================================================
+         HEADER: Phatthana Lab Branding + Sound & Projector Controls
+         ========================================================= -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-4 border-slate-800 shadow-sm">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
+            <!-- Brand Mascot & Title -->
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-sky-100 border-3 border-slate-800 flex items-center justify-center shadow-[0_3px_0_#1e293b] animate-float p-1.5 shrink-0">
+                    <!-- Cute Cartoon Science Flask Mascot SVG -->
+                    <svg viewBox="0 0 64 64" class="w-10 h-10 sm:w-11 sm:h-11" aria-label="Phatthana Lab Mascot">
+                        <ellipse cx="32" cy="34" rx="26" ry="10" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4 3" transform="rotate(-18 32 34)"/>
+                        <path d="M25 12 H39 V22 L51 46 C53 50 50 55 45 55 H19 C14 55 11 50 13 46 L25 22 Z" fill="#ffffff" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
+                        <path d="M18 39 Q25 35 32 39 T46 39 L49 46 C50.5 49 48.5 52.5 45 52.5 H19 C15.5 52.5 13.5 49 15 46 Z" fill="#34d399"/>
+                        <circle cx="26" cy="43" r="2.2" fill="#1e293b"/>
+                        <circle cx="38" cy="43" r="2.2" fill="#1e293b"/>
+                        <circle cx="22.5" cy="45.5" r="2" fill="#fb7185" opacity="0.7"/>
+                        <circle cx="41.5" cy="45.5" r="2" fill="#fb7185" opacity="0.7"/>
+                        <path d="M29 45 Q32 48.5 35 45" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+                        <circle cx="31" cy="28" r="2.5" fill="#fde047" stroke="#1e293b" stroke-width="1.5"/>
+                        <circle cx="36" cy="18" r="2" fill="#38bdf8" stroke="#1e293b" stroke-width="1.5"/>
+                        <rect x="22" y="9" width="20" height="4.5" rx="2.2" fill="#fde047" stroke="#1e293b" stroke-width="2.5"/>
+                    </svg>
+                </div>
+                <div class="truncate">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight leading-none truncate">Phatthana Lab</h1>
+                        </div>
+                    <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5 truncate">สื่อช่วยสอนเรื่องโครงสร้างและสมบัติของพอลิเมอร์</p>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="cartoon-btn bg-amber-100 hover:bg-amber-200 px-3 py-2 flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-800" title="เปิด/ปิดเสียงเอฟเฟกต์">
+                    <span id="soundIcon" class="text-base sm:text-lg">🔊</span>
+                    <span id="soundLabel" class="hidden sm:inline">เสียง: เปิด</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- =========================================================
+         MAIN NAVIGATION TABS (5 Learning Modes - Touch Scrollable)
+         ========================================================= -->
+    <nav class="max-w-6xl mx-auto px-3 sm:px-4 mt-4">
+        <div class="flex md:grid md:grid-cols-5 gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-2 pt-1">
+            <button id="tabBtn-lab" onclick="switchTab('lab')" class="cartoon-btn tab-active bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="text-lg">🧪</span>
+                <span>1. ห้องทดลอง</span>
+            </button>
+            <button id="tabBtn-builder" onclick="switchTab('builder')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="text-lg">🧬</span>
+                <span>2. ต่อโมเลกุลเอง</span>
+            </button>
+            <button id="tabBtn-recycle" onclick="switchTab('recycle')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="text-lg">♻️</span>
+                <span>3. แยกขยะพอลิเมอร์</span>
+            </button>
+            <button id="tabBtn-compare" onclick="switchTab('compare')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="text-lg">📊</span>
+                <span>4. ตารางเปรียบเทียบ</span>
+            </button>
+            <button id="tabBtn-quiz" onclick="switchTab('quiz')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
+                <span class="text-lg">🎮</span>
+                <span>5. ควิซท้าทาย</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- =========================================================
+         MAIN CONTENT CONTAINER
+         ========================================================= -->
+    <main class="max-w-6xl mx-auto px-3 sm:px-4 mt-4">
+
+        <!-- =====================================================
+             TAB 1: ห้องทดลองจำลอง (Interactive Polymer Lab + Custom Polymer Support)
+             ===================================================== -->
+        <section id="section-lab" class="space-y-5">
+            <!-- Polymer Type Selector + Teacher Presentation Controls -->
+            <div class="cartoon-card p-4 sm:p-5 bg-white">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 mb-3">
+                    <div>
+                        <h2 class="text-base sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span>🔬</span> เลือกโครงสร้างพอลิเมอร์ที่ต้องการทดลอง
+                        </h2>
+                        <p class="text-xs text-slate-500">เลือกแบบมาตรฐาน 3 แบบ หรือทดลองโมเลกุลที่คุณต่อเองจากแท็บ 2</p>
+                    </div>
+                    <!-- Teacher Presentation Mode Buttons -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="hideAnswerBtn" onclick="toggleHideAnswers()" class="cartoon-btn bg-amber-100 hover:bg-amber-200 px-3 py-1.5 text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                            <span id="hideAnswerIcon">👁️</span>
+                            <span id="hideAnswerText">ซ่อนเฉลย (ทายผล)</span>
+                        </button>
+                        <button id="projectorBtn" onclick="toggleProjectorMode()" class="cartoon-btn bg-indigo-100 hover:bg-indigo-200 px-3 py-1.5 text-xs font-bold text-indigo-950 flex items-center gap-1.5">
+                            <span>📽️</span>
+                            <span id="projectorText">โหมดสอนหน้าชั้น</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Polymer Buttons Grid (3 Standard + Dynamic 4th Custom Polymer Button) -->
+                <div id="labSelectorGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                    <!-- Linear -->
+                    <button id="polyBtn-linear" onclick="selectPolymer('linear')" class="cartoon-btn bg-sky-200 p-3 text-left flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-white border-2 border-slate-800 flex items-center justify-center shrink-0">
+                            <svg viewBox="0 0 40 40" class="w-8 h-8">
+                                <line x1="4" y1="14" x2="36" y2="14" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+                                <circle cx="10" cy="14" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="14" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="30" cy="14" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <line x1="4" y1="26" x2="36" y2="26" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+                                <circle cx="10" cy="26" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="26" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="30" cy="26" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-900 text-sm sm:text-base truncate">1. แบบเส้น (Linear)</div>
+                            <div class="text-xs text-slate-700 truncate">HDPE, PVC, ไนลอน</div>
+                        </div>
+                    </button>
+
+                    <!-- Branched -->
+                    <button id="polyBtn-branched" onclick="selectPolymer('branched')" class="cartoon-btn bg-white hover:bg-emerald-50 p-3 text-left flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-white border-2 border-slate-800 flex items-center justify-center shrink-0">
+                            <svg viewBox="0 0 40 40" class="w-8 h-8">
+                                <line x1="4" y1="22" x2="36" y2="22" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+                                <line x1="20" y1="22" x2="20" y2="10" stroke="#059669" stroke-width="3.5" stroke-linecap="round"/>
+                                <line x1="29" y1="22" x2="33" y2="32" stroke="#059669" stroke-width="3.5" stroke-linecap="round"/>
+                                <circle cx="10" cy="22" r="4" fill="#34d399" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="22" r="4" fill="#34d399" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="30" cy="22" r="4" fill="#34d399" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="11" r="3.6" fill="#6ee7b7" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="33" cy="32" r="3.6" fill="#6ee7b7" stroke="#1e293b" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-900 text-sm sm:text-base truncate">2. แบบกิ่ง (Branched)</div>
+                            <div class="text-xs text-slate-700 truncate">LDPE, ถุงพลาสติก, ฟิล์ม</div>
+                        </div>
+                    </button>
+
+                    <!-- Cross-linked -->
+                    <button id="polyBtn-crosslinked" onclick="selectPolymer('crosslinked')" class="cartoon-btn bg-white hover:bg-purple-50 p-3 text-left flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-white border-2 border-slate-800 flex items-center justify-center shrink-0">
+                            <svg viewBox="0 0 40 40" class="w-8 h-8">
+                                <line x1="6" y1="12" x2="34" y2="12" stroke="#7c3aed" stroke-width="3.5"/>
+                                <line x1="6" y1="28" x2="34" y2="28" stroke="#7c3aed" stroke-width="3.5"/>
+                                <line x1="13" y1="12" x2="13" y2="28" stroke="#f59e0b" stroke-width="3.5"/>
+                                <line x1="27" y1="12" x2="27" y2="28" stroke="#f59e0b" stroke-width="3.5"/>
+                                <circle cx="13" cy="12" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="27" cy="12" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="13" cy="28" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="27" cy="28" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-900 text-sm sm:text-base truncate">3. แบบร่างแห (Cross-linked)</div>
+                            <div class="text-xs text-slate-700 truncate">เมลามีน, เบกาไลต์, อีพ็อกซี</div>
+                        </div>
+                    </button>
+
+                    <!-- 4th Button: Custom Built Polymer (Shown when user creates one in Builder) -->
+                    <button id="polyBtn-custom" onclick="selectPolymer('custom')" class="hidden cartoon-btn bg-white hover:bg-amber-50 p-3 text-left flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-amber-300 border-2 border-slate-800 flex items-center justify-center shrink-0 text-2xl">
+                            🧬
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-900 text-sm sm:text-base truncate">4. โมเลกุลของคุณเอง!</div>
+                            <div id="customBtnSubtitle" class="text-xs text-amber-800 font-semibold truncate">โครงสร้างที่ต่อเอง</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Workspace: Left Simulation Canvas + Controls, Right Live Dashboard -->
+            <div id="labWorkspaceGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+                <!-- LEFT COLUMN: Simulation Tank & Interactive Controls -->
+                <div id="labTankCol" class="lg:col-span-7 cartoon-card p-4 sm:p-5 bg-white space-y-4">
+                    <div class="flex flex-nowrap items-center justify-between gap-2">
+                        <h3 id="simTitle" class="font-bold text-slate-900 flex-1 min-w-0 truncate" style="font-size: clamp(0.875rem, 2.2vw, 1.125rem);">
+                            🔬 ตู้จำลองโมเลกุล: พอลิเมอร์แบบเส้น
+                        </h3>
+                        <span id="simStateBadge" class="shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-100 text-sky-900">
+                            ❄️ สถานะ: ของแข็ง เรียงตัวเป็นระเบียบ
+                        </span>
+                    </div>
+
+                    <!-- Interactive 2D Canvas Tank -->
+                    <div class="sim-tank" id="canvasContainer">
+                        <canvas id="polymerCanvas"></canvas>
+                    </div>
+
+                    <!-- Temperature & Stretch Controls -->
+                    <div class="bg-slate-50 border-2 border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3.5">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="tempSlider" class="font-bold text-slate-800 flex items-center gap-1.5 text-sm sm:text-base">
+                                    🌡️ ควบคุมอุณหภูมิ (Heat Control)
+                                </label>
+                                <span id="tempReadout" class="font-cartoon font-bold text-base sm:text-xl px-3 py-0.5 rounded-xl bg-sky-200 border-2 border-slate-800 text-slate-900">
+                                    25°C
+                                </span>
+                            </div>
+                            <input type="range" id="tempSlider" min="25" max="300" value="25" step="1" class="temp-slider w-full" oninput="onTemperatureChange(this.value)">
+                            <div class="flex justify-between text-xs font-semibold text-slate-500 mt-1 px-1">
+                                <span>25°C (เย็น)</span>
+                                <span>150°C (ร้อน)</span>
+                                <span>300°C (ไฟสีฟ้า!)</span>
+                            </div>
+                        </div>
+
+                        <!-- Preset Temp Buttons + Stretch Test Button -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button onclick="setTemperature(25)" class="cartoon-btn bg-sky-100 hover:bg-sky-200 px-2 py-2.5 text-xs sm:text-sm font-bold text-slate-800">
+                                ❄️ ห้อง 25°C
+                            </button>
+                            <button onclick="setTemperature(150)" class="cartoon-btn bg-amber-200 hover:bg-amber-300 px-2 py-2.5 text-xs sm:text-sm font-bold text-slate-800">
+                                🔥 ร้อน 150°C
+                            </button>
+                            <button onclick="setTemperature(280)" class="cartoon-btn bg-rose-200 hover:bg-rose-300 px-2 py-2.5 text-xs sm:text-sm font-bold text-slate-800">
+                                🌋 ร้อนจัด 280°C
+                            </button>
+                            <button id="stretchBtn" onclick="triggerStretchTest()" class="cartoon-btn bg-violet-200 hover:bg-violet-300 px-2 py-2.5 text-xs sm:text-sm font-bold text-slate-900">
+                                ↔️ ทดสอบแรงดึง
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Live Property Dashboard & Examples -->
+                <div id="labRightCol" class="lg:col-span-5 space-y-5 relative">
+                    <!-- Hidden Answer Curtain for Teacher Quiz Mode -->
+                    <div id="teacherAnswerMask" class="hidden cartoon-card p-6 bg-amber-50 text-center space-y-4">
+                        <div class="text-5xl">🕵️‍♂️</div>
+                        <h3 class="text-xl font-bold text-slate-900">ซ่อนแผงคำอธิบายอยู่!</h3>
+                        <p class="text-sm text-slate-700 leading-relaxed">
+                            ให้นักเรียนสังเกตพฤติกรรมของโมเลกุลในตู้ทดลองเมื่อเพิ่มอุณหภูมิหรือทดสอบแรงดึง แล้วร่วมกันทายสมบัติก่อนกดเปิดเฉลยครับ
+                        </p>
+                        <button onclick="toggleHideAnswers()" class="cartoon-btn bg-emerald-300 hover:bg-emerald-400 px-5 py-2.5 font-bold text-slate-900 text-sm">
+                            👁️ เปิดดูเฉลยและสมบัติ
+                        </button>
+                    </div>
+
+                    <!-- Property Dashboard Card -->
+                    <div id="propertyDashboardCard" class="cartoon-card p-4 sm:p-5 bg-white space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900">📋 แผงสมบัติทางกายภาพ</h3>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span id="badgePlasticType" class="text-xs font-bold px-2.5 py-1 rounded-full border-2 border-slate-800 bg-sky-100 text-sky-900">เทอร์มอพลาสติก</span>
+                                <span id="badgeRecycle" class="text-xs font-bold px-2.5 py-1 rounded-full border-2 border-slate-800 bg-emerald-100 text-emerald-900">♻️ รีไซเคิลได้</span>
+                            </div>
+                        </div>
+
+                        <!-- Custom Polymer Extra Info Banner (Visible when custom polymer is active) -->
+                        <div id="customStatsBanner" class="hidden bg-amber-50 border-2 border-amber-400 rounded-xl p-2.5 text-xs font-bold text-amber-950 flex flex-wrap items-center justify-between gap-2">
+                            <span id="customNodeBondSummary">มอนอเมอร์ 0 ตัว | พันธะ 0 เส้น | สะพานกำมะถัน 0 จุด</span>
+                            <button onclick="switchTab('builder')" class="underline text-amber-800 hover:text-amber-950">✏️ กลับไปแก้ไข</button>
+                        </div>
+
+                        <!-- Animated Property Bars -->
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs sm:text-sm font-bold mb-1">
+                                    <span>⚖️ ความหนาแน่น (Density)</span>
+                                    <span id="valDensity" class="text-sky-700">สูง (85%)</span>
+                                </div>
+                                <div class="w-full h-3.5 bg-slate-100 rounded-full border-2 border-slate-800 overflow-hidden">
+                                    <div id="barDensity" class="prop-bar-fill h-full bg-sky-400 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs sm:text-sm font-bold mb-1">
+                                    <span>〰️ ความยืดหยุ่น (Flexibility)</span>
+                                    <span id="valFlex" class="text-emerald-700">ปานกลาง (55%)</span>
+                                </div>
+                                <div class="w-full h-3.5 bg-slate-100 rounded-full border-2 border-slate-800 overflow-hidden">
+                                    <div id="barFlex" class="prop-bar-fill h-full bg-emerald-400 rounded-full" style="width: 55%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs sm:text-sm font-bold mb-1">
+                                    <span>🔥 จุดหลอมเหลว / ทนความร้อน</span>
+                                    <span id="valMelt" class="text-amber-700">สูง (~140°C)</span>
+                                </div>
+                                <div class="w-full h-3.5 bg-slate-100 rounded-full border-2 border-slate-800 overflow-hidden">
+                                    <div id="barMelt" class="prop-bar-fill h-full bg-amber-400 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Observation Speech Bubble -->
+                        <div class="bg-amber-50 border-2 border-slate-800 rounded-2xl p-3.5">
+                            <div class="text-xs font-bold text-amber-800 uppercase tracking-wide mb-1 flex items-center gap-1">
+                                <span>💡</span> สิ่งที่กำลังเกิดขึ้นตอนนี้:
+                            </div>
+                            <p id="liveExplanation" class="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
+                                สายโซ่มอนอเมอร์เรียงชิดติดกันอย่างเป็นระเบียบ มีช่องว่างน้อย ทำให้พอลิเมอร์แบบเส้นมีความหนาแน่นสูง แข็งแรง และเหนียว
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Everyday Examples Card -->
+                    <div id="exampleCardContainer" class="cartoon-card p-4 sm:p-5 bg-white">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <span>🛍️</span> ตัวอย่างสิ่งของที่สมบัติใกล้เคียงกัน
+                        </h3>
+                        <div id="exampleCardsGrid" class="grid grid-cols-3 gap-2">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             TAB 2: ต่อโมเลกุลเอง (Interactive Polymer Builder)
+             ===================================================== -->
+        <section id="section-builder" class="hidden space-y-5 animate-pop">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                <!-- Left: Interactive Builder Canvas (8 cols) -->
+                <div class="lg:col-span-8 cartoon-card p-4 sm:p-5 bg-white space-y-3.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <span>🧬</span> ห้องปฏิบัติการต่อโมเลกุลเอง
+                            </h2>
+                            <p id="builderHintText" class="text-xs sm:text-sm text-slate-600">
+                                แตะที่พื้นที่ว่างเพื่อวางมอนอเมอร์ หรือลากมอนอเมอร์มาต่อแขนกัน!
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="loadBuilderStarterPreset()" class="cartoon-btn bg-sky-100 hover:bg-sky-200 px-3 py-1.5 text-xs font-bold text-sky-950">
+                                ✨ วางโซ่ตัวอย่าง
+                            </button>
+                            <button onclick="clearBuilder()" class="cartoon-btn bg-rose-100 hover:bg-rose-200 px-3 py-1.5 text-xs font-bold text-rose-900">
+                                🗑️ ล้างกระดาน
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tool Mode Selector -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button id="bTool-add" onclick="setBuilderTool('add')" class="cartoon-btn bg-sky-200 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
+                            <span>➕</span> วาง / ย้ายตัว
+                        </button>
+                        <button id="bTool-bond" onclick="setBuilderTool('bond')" class="cartoon-btn bg-white hover:bg-emerald-50 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
+                            <span>🔗</span> เชื่อมสายโซ่
+                        </button>
+                        <button id="bTool-sulfur" onclick="setBuilderTool('sulfur')" class="cartoon-btn bg-white hover:bg-amber-50 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
+                            <span>⚡</span> สะพานกำมะถัน
+                        </button>
+                        <button id="bTool-delete" onclick="setBuilderTool('delete')" class="cartoon-btn bg-white hover:bg-rose-50 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
+                            <span>❌</span> ลบจุด/เส้น
+                        </button>
+                    </div>
+
+                    <!-- Builder Drawing Board -->
+                    <div class="builder-tank" id="builderContainer">
+                        <canvas id="builderCanvas"></canvas>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-xl border-2 border-slate-200">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-sky-400 border border-slate-800 inline-block"></span> มอนอเมอร์</span>
+                            <span class="flex items-center gap-1"><span class="w-5 h-1.5 bg-slate-700 inline-block rounded"></span> พันธะโควาเลนต์</span>
+                            <span class="flex items-center gap-1"><span class="w-5 h-1.5 bg-amber-400 inline-block rounded"></span> สะพานกำมะถัน (Cross-link)</span>
+                        </div>
+                        <span id="builderCountsLabel" class="font-bold text-slate-800">0 มอนอเมอร์ | 0 พันธะ</span>
+                    </div>
+                </div>
+
+                <!-- Right: Live Structure Analyzer & Send to Lab (4 cols) -->
+                <div class="lg:col-span-4 cartoon-card p-4 sm:p-5 bg-white space-y-4">
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span>🔍</span> ผลวิเคราะห์โครงสร้างของคุณ
+                    </h3>
+
+                    <div id="builderResultCard" class="p-4 rounded-2xl border-2 border-slate-800 bg-slate-50 space-y-2">
+                        <div class="text-xs font-bold text-slate-500">โครงสร้างที่ตรวจพบ:</div>
+                        <div id="builderDetectedName" class="text-lg sm:text-xl font-bold text-slate-900">ยังไม่มีโครงสร้าง</div>
+                        <p id="builderDetectedDesc" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                            ลองวางมอนอเมอร์อย่างน้อย 3 ตัว แล้วลากเชื่อมพันธะเข้าด้วยกันดูสิ!
+                        </p>
+                    </div>
+
+                    <!-- Quick Building Tips -->
+                    <div class="bg-amber-50 border-2 border-slate-800 rounded-2xl p-3.5 text-xs space-y-1.5 text-slate-800">
+                        <div class="font-bold text-amber-900 text-sm">💡 คู่มือการสร้าง 3 แบบ:</div>
+                        <p>• <strong>แบบเส้น:</strong> ต่อมอนอเมอร์เป็นแถวตรงยาว (แต่ละตัวมีแขนไม่เกิน 2 ข้าง)</p>
+                        <p>• <strong>แบบกิ่ง:</strong> แตกแขนงย่อยออกมาจากสายโซ่หลัก (มีตัวที่เชื่อม 3 แขนขึ้นไป)</p>
+                        <p>• <strong>แบบร่างแห:</strong> กดปุ่ม <strong>⚡ สะพานกำมะถัน</strong> แล้วลากเชื่อมระหว่างสายโซ่!</p>
+                    </div>
+
+                    <!-- Send REAL custom structure to Lab Button -->
+                    <button id="testBuiltPolymerBtn" onclick="sendBuiltPolymerToLab()" disabled class="cartoon-btn w-full bg-amber-300 hover:bg-amber-400 py-3.5 px-4 font-bold text-slate-900 text-sm sm:text-base flex items-center justify-center gap-2">
+                        <span>🔥</span>
+                        <span>นำไปทดสอบความร้อนในห้องทดลอง!</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             TAB 3: ภารกิจแยกขยะพอลิเมอร์ (Recycle Sorter Game)
+             ===================================================== -->
+        <section id="section-recycle" class="hidden max-w-4xl mx-auto space-y-5 animate-pop">
+            <div class="cartoon-card p-4 sm:p-6 bg-white space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-dashed border-slate-300 pb-4">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                            <span>♻️</span> ภารกิจแยกขยะพอลิเมอร์
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-600">ลากสิ่งของ (หรือแตะสิ่งของแล้วแตะถังด้านล่าง) ให้ถูกประเภทพลาสติก!</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1.5 rounded-xl bg-emerald-100 border-2 border-slate-800 font-bold text-sm">
+                            ✅ คัดแยกแล้ว: <span id="recycleScore">0</span>/12
+                        </span>
+                        <button onclick="resetRecycleGame()" class="cartoon-btn bg-slate-100 hover:bg-slate-200 px-3 py-1.5 text-xs font-bold">
+                            🔄 เริ่มใหม่
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Feedback Toast Banner -->
+                <div id="recycleFeedback" class="hidden rounded-2xl border-2 border-slate-800 p-3.5 text-sm font-bold flex items-center gap-2.5 animate-pop">
+                    <span id="recycleFbIcon" class="text-2xl">🎉</span>
+                    <span id="recycleFbText">ถูกต้อง!</span>
+                </div>
+
+                <!-- Items Tray -->
+                <div id="recycleTrayContainer" class="bg-slate-50 border-2 border-slate-800 rounded-2xl p-3.5 sm:p-4">
+                    <div class="text-xs font-bold text-slate-500 mb-2.5">📦 สิ่งของที่รอการคัดแยก (แตะเพื่อเลือก หรือลากลงถัง):</div>
+                    <div id="recycleItemsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Two Sorting Bins -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Bin 1: Thermoplastic -->
+                    <div id="bin-thermoplastic"
+                         onclick="handleBinClick('thermoplastic')"
+                         ondragover="event.preventDefault(); this.classList.add('bin-drop-active')"
+                         ondragleave="this.classList.remove('bin-drop-active')"
+                         ondrop="handleBinDrop(event, 'thermoplastic')"
+                         class="cartoon-btn bg-gradient-to-b from-emerald-100 to-emerald-200 p-5 text-center space-y-2 cursor-pointer">
+                        <div class="text-5xl">♻️</div>
+                        <h3 class="text-lg sm:text-xl font-bold text-emerald-950">หลอมรีไซเคิลได้</h3>
+                        <div class="inline-block px-3 py-0.5 rounded-full bg-white border-2 border-slate-800 text-xs font-bold text-emerald-900">
+                            เทอร์มอพลาสติก (แบบเส้น & แบบกิ่ง)
+                        </div>
+                        <p class="text-xs text-emerald-900">เมื่อได้รับความร้อนจะอ่อนตัวและหลอมเหลว นำกลับมาขึ้นรูปใหม่ได้</p>
+                    </div>
+
+                    <!-- Bin 2: Thermoset -->
+                    <div id="bin-thermoset"
+                         onclick="handleBinClick('thermoset')"
+                         ondragover="event.preventDefault(); this.classList.add('bin-drop-active')"
+                         ondragleave="this.classList.remove('bin-drop-active')"
+                         ondrop="handleBinDrop(event, 'thermoset')"
+                         class="cartoon-btn bg-gradient-to-b from-rose-100 to-rose-200 p-5 text-center space-y-2 cursor-pointer">
+                        <div class="text-5xl">🔥</div>
+                        <h3 class="text-lg sm:text-xl font-bold text-rose-950">หลอมใหม่ไม่ได้</h3>
+                        <div class="inline-block px-3 py-0.5 rounded-full bg-white border-2 border-slate-800 text-xs font-bold text-rose-900">
+                            เทอร์มอเซต (แบบร่างแห)
+                        </div>
+                        <p class="text-xs text-rose-900">มีพันธะเชื่อมขวางยึดแน่น ทนความร้อนสูง ร้อนจัดจะไหม้เกรียมไม่หลอมเหลว</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             TAB 4: ตารางเปรียบเทียบ (Visual Comparison)
+             ===================================================== -->
+        <section id="section-compare" class="hidden space-y-6 animate-pop">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Linear Card -->
+                <div class="cartoon-card p-5 bg-gradient-to-b from-sky-50 to-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-bold text-sky-900">1. แบบเส้น</h3>
+                        <span class="text-xs font-bold bg-sky-200 border-2 border-slate-800 px-2.5 py-0.5 rounded-full">Linear</span>
+                    </div>
+                    <div class="bg-white border-2 border-slate-800 rounded-xl p-3 mb-3 flex justify-center">
+                        <svg viewBox="0 0 200 84" class="w-full max-w-[200px] h-20">
+                            <g stroke="#0284c7" stroke-width="5" stroke-linecap="round">
+                                <line x1="15" y1="22" x2="185" y2="22"/>
+                                <line x1="15" y1="44" x2="185" y2="44"/>
+                                <line x1="15" y1="66" x2="185" y2="66"/>
+                            </g>
+                            <g fill="#38bdf8" stroke="#1e293b" stroke-width="2">
+                                <circle cx="30" cy="22" r="8"/><circle cx="65" cy="22" r="8"/><circle cx="100" cy="22" r="8"/><circle cx="135" cy="22" r="8"/><circle cx="170" cy="22" r="8"/>
+                                <circle cx="30" cy="44" r="8"/><circle cx="65" cy="44" r="8"/><circle cx="100" cy="44" r="8"/><circle cx="135" cy="44" r="8"/><circle cx="170" cy="44" r="8"/>
+                                <circle cx="30" cy="66" r="8"/><circle cx="65" cy="66" r="8"/><circle cx="100" cy="66" r="8"/><circle cx="135" cy="66" r="8"/><circle cx="170" cy="66" r="8"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <ul class="text-sm space-y-1.5 text-slate-700">
+                        <li>✅ <strong>เรียงตัว:</strong> ชิดกันเป็นระเบียบ ช่องว่างน้อย</li>
+                        <li>✅ <strong>สมบัติ:</strong> หนาแน่นสูง แข็ง เหนียว</li>
+                        <li>🔥 <strong>เมื่อร้อน:</strong> อ่อนตัวและหลอมเหลวได้</li>
+                        <li>♻️ <strong>รีไซเคิล:</strong> ได้ (เทอร์มอพลาสติก)</li>
+                    </ul>
+                </div>
+
+                <!-- Branched Card -->
+                <div class="cartoon-card p-5 bg-gradient-to-b from-emerald-50 to-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-bold text-emerald-900">2. แบบกิ่ง</h3>
+                        <span class="text-xs font-bold bg-emerald-200 border-2 border-slate-800 px-2.5 py-0.5 rounded-full">Branched</span>
+                    </div>
+                    <div class="bg-white border-2 border-slate-800 rounded-xl p-3 mb-3 flex justify-center">
+                        <svg viewBox="0 0 200 84" class="w-full max-w-[200px] h-20">
+                            <g stroke="#059669" stroke-width="5" stroke-linecap="round">
+                                <line x1="15" y1="22" x2="185" y2="22"/>
+                                <line x1="65" y1="22" x2="65" y2="40"/>
+                                <line x1="135" y1="22" x2="150" y2="38"/>
+                                <line x1="15" y1="68" x2="185" y2="68"/>
+                                <line x1="100" y1="68" x2="100" y2="50"/>
+                            </g>
+                            <g fill="#34d399" stroke="#1e293b" stroke-width="2">
+                                <circle cx="30" cy="22" r="8"/><circle cx="65" cy="22" r="8"/><circle cx="100" cy="22" r="8"/><circle cx="135" cy="22" r="8"/><circle cx="170" cy="22" r="8"/>
+                                <circle cx="65" cy="40" r="7" fill="#6ee7b7"/><circle cx="150" cy="38" r="7" fill="#6ee7b7"/>
+                                <circle cx="30" cy="68" r="8"/><circle cx="65" cy="68" r="8"/><circle cx="100" cy="68" r="8"/><circle cx="135" cy="68" r="8"/><circle cx="170" cy="68" r="8"/>
+                                <circle cx="100" cy="50" r="7" fill="#6ee7b7"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <ul class="text-sm space-y-1.5 text-slate-700">
+                        <li>✅ <strong>เรียงตัว:</strong> มีกิ่งเกะกะ สายโซ่จึงอยู่ห่างกัน</li>
+                        <li>✅ <strong>สมบัติ:</strong> หนาแน่นต่ำ อ่อนนุ่ม ยืดหยุ่นสูง</li>
+                        <li>🔥 <strong>เมื่อร้อน:</strong> หลอมเหลวได้ง่ายกว่าแบบเส้น</li>
+                        <li>♻️ <strong>รีไซเคิล:</strong> ได้ (เทอร์มอพลาสติก)</li>
+                    </ul>
+                </div>
+
+                <!-- Cross-linked Card -->
+                <div class="cartoon-card p-5 bg-gradient-to-b from-purple-50 to-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-bold text-purple-900">3. แบบร่างแห</h3>
+                        <span class="text-xs font-bold bg-purple-200 border-2 border-slate-800 px-2.5 py-0.5 rounded-full">Cross-linked</span>
+                    </div>
+                    <div class="bg-white border-2 border-slate-800 rounded-xl p-3 mb-3 flex justify-center">
+                        <svg viewBox="0 0 200 84" class="w-full max-w-[200px] h-20">
+                            <g stroke="#7c3aed" stroke-width="5" stroke-linecap="round">
+                                <line x1="15" y1="20" x2="185" y2="20"/>
+                                <line x1="15" y1="64" x2="185" y2="64"/>
+                            </g>
+                            <g stroke="#f59e0b" stroke-width="5" stroke-linecap="round">
+                                <line x1="45" y1="20" x2="45" y2="64"/>
+                                <line x1="100" y1="20" x2="100" y2="64"/>
+                                <line x1="155" y1="20" x2="155" y2="64"/>
+                            </g>
+                            <g fill="#a78bfa" stroke="#1e293b" stroke-width="2">
+                                <circle cx="45" cy="20" r="8"/><circle cx="100" cy="20" r="8"/><circle cx="155" cy="20" r="8"/>
+                                <circle cx="45" cy="64" r="8"/><circle cx="100" cy="64" r="8"/><circle cx="155" cy="64" r="8"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <ul class="text-sm space-y-1.5 text-slate-700">
+                        <li>✅ <strong>เรียงตัว:</strong> เชื่อมโยงเป็นโครงข่าย 3 มิติ</li>
+                        <li>✅ <strong>สมบัติ:</strong> แข็งแกร่ง คงรูปดี แต่เปราะ</li>
+                        <li>🔥 <strong>เมื่อร้อน:</strong> ไม่หลอมเหลว (ร้อนจัดจะไหม้)</li>
+                        <li>🚫 <strong>รีไซเคิล:</strong> ไม่ได้ (เทอร์มอเซต)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Detailed Comparison Table -->
+            <div class="cartoon-card p-4 sm:p-6 bg-white overflow-hidden">
+                <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span>📑</span> ตารางสรุปเปรียบเทียบพอลิเมอร์ทั้ง 3 แบบ
+                </h2>
+                <div class="overflow-x-auto rounded-2xl border-2 border-slate-800">
+                    <table class="w-full text-left border-collapse text-xs sm:text-base min-w-[600px]">
+                        <thead>
+                            <tr class="bg-slate-800 text-white">
+                                <th class="p-3 font-bold">สมบัติที่เปรียบเทียบ</th>
+                                <th class="p-3 font-bold bg-sky-600">แบบเส้น (Linear)</th>
+                                <th class="p-3 font-bold bg-emerald-600">แบบกิ่ง (Branched)</th>
+                                <th class="p-3 font-bold bg-purple-600">แบบร่างแห (Cross-linked)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-2 divide-slate-200">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold bg-slate-50">การจัดเรียงสายโซ่</td>
+                                <td class="p-3">เรียงชิดเป็นระเบียบ ช่องว่างน้อย</td>
+                                <td class="p-3">เรียงหลวมๆ มีกิ่งกั้น ช่องว่างมาก</td>
+                                <td class="p-3">มีพันธะเชื่อมขวางยึดเป็นโครงข่าย 3 มิติ</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold bg-slate-50">ความหนาแน่น</td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded-lg bg-sky-100 font-bold text-sky-900">สูง</span></td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded-lg bg-emerald-100 font-bold text-emerald-900">ต่ำ</span></td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded-lg bg-purple-100 font-bold text-purple-900">สูง</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold bg-slate-50">จุดหลอมเหลว</td>
+                                <td class="p-3">สูง</td>
+                                <td class="p-3">ต่ำ</td>
+                                <td class="p-3 font-semibold text-rose-600">ไม่หลอมเหลว (ไหม้/สลายตัวเมื่อร้อนจัด)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold bg-slate-50">ความแข็งแรง / ยืดหยุ่น</td>
+                                <td class="p-3">แข็ง เหนียว ทนแรงดึงดี</td>
+                                <td class="p-3">อ่อนนุ่ม โค้งงอและยืดหยุ่นดี</td>
+                                <td class="p-3">แข็งมาก คงรูปได้ดี แต่เปราะแตกได้</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold bg-slate-50">ประเภทพลาสติก</td>
+                                <td class="p-3">เทอร์มอพลาสติก</td>
+                                <td class="p-3">เทอร์มอพลาสติก</td>
+                                <td class="p-3">เทอร์มอเซตติ้งพลาสติก</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold bg-slate-50">การหลอมรีไซเคิล</td>
+                                <td class="p-3 font-bold text-emerald-700">♻️ รีไซเคิลได้</td>
+                                <td class="p-3 font-bold text-emerald-700">♻️ รีไซเคิลได้</td>
+                                <td class="p-3 font-bold text-rose-600">🚫 รีไซเคิลไม่ได้</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold bg-slate-50">ตัวอย่างเด่น</td>
+                                <td class="p-3">ท่อ PVC, ขวดนม HDPE, เชือกไนลอน</td>
+                                <td class="p-3">ถุงเย็น LDPE, ถุงหูหิ้ว, ฟิล์มห่ออาหาร</td>
+                                <td class="p-3">จานเมลามีน, ด้ามกระทะเบกาไลต์, กาวอีพ็อกซี</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             TAB 5: ควิซท้าทาย (Gamified Mini Quiz - 8 Questions)
+             ===================================================== -->
+        <section id="section-quiz" class="hidden max-w-3xl mx-auto animate-pop">
+            <div class="cartoon-card p-5 sm:p-7 bg-white">
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b-2 border-dashed border-slate-300">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">🎮 ภารกิจแยกพอลิเมอร์</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">ตอบให้ครบ 8 ข้อเพื่อพิชิตเหรียญนักเคมีแห่ง Phatthana Lab!</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="px-3 py-1.5 rounded-xl bg-amber-100 border-2 border-slate-800 font-bold text-xs sm:text-sm">
+                            ⭐ คะแนน: <span id="quizScore">0</span>/8
+                        </div>
+                        <div class="px-3 py-1.5 rounded-xl bg-orange-100 border-2 border-slate-800 font-bold text-xs sm:text-sm">
+                            🔥 ต่อเนื่อง: <span id="quizStreak">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Progress Bar -->
+                <div class="mt-4">
+                    <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                        <span id="quizProgressText">ข้อที่ 1 จาก 8</span>
+                        <span id="quizProgressPercent">12%</span>
+                    </div>
+                    <div class="w-full h-3.5 bg-slate-100 rounded-full border-2 border-slate-800 overflow-hidden">
+                        <div id="quizProgressBar" class="prop-bar-fill h-full bg-amber-400 rounded-full" style="width: 12.5%"></div>
+                    </div>
+                </div>
+
+                <!-- Active Question View -->
+                <div id="quizActiveView" class="mt-6 space-y-5">
+                    <div class="flex flex-col sm:flex-row items-center gap-4 bg-sky-50 border-2 border-slate-800 rounded-2xl p-4 sm:p-5">
+                        <div id="quizMascotBox" class="w-20 h-20 rounded-2xl bg-white border-2 border-slate-800 flex items-center justify-center text-5xl shrink-0 shadow-[0_4px_0_#1e293b]">
+                            🧪
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <span id="quizCategoryBadge" class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-white border-2 border-slate-800 mb-1.5">จำแนกจากสิ่งของ</span>
+                            <h3 id="quizQuestionText" class="text-base sm:text-xl font-bold text-slate-900 leading-snug">
+                                โหลดคำถาม...
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div id="quizOptionsGrid" class="grid grid-cols-1 gap-3"></div>
+
+                    <div id="quizFeedbackBox" class="hidden rounded-2xl border-2 border-slate-800 p-4 animate-pop">
+                        <div class="flex items-start gap-3">
+                            <div id="quizFeedbackIcon" class="text-3xl shrink-0">🎉</div>
+                            <div class="flex-1">
+                                <h4 id="quizFeedbackTitle" class="font-bold text-base sm:text-lg">ถูกต้อง!</h4>
+                                <p id="quizFeedbackDesc" class="text-xs sm:text-sm text-slate-700 mt-1 leading-relaxed"></p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button id="quizNextBtn" onclick="nextQuizQuestion()" class="cartoon-btn bg-amber-300 hover:bg-amber-400 px-5 py-2.5 font-bold text-slate-900 text-sm sm:text-base">
+                                ข้อต่อไป ➡️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completion Summary View -->
+                <div id="quizResultView" class="hidden mt-6 text-center space-y-5 py-4 animate-pop relative overflow-hidden rounded-2xl">
+                    <div id="confettiContainer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+                    <div id="resultTrophy" class="text-7xl animate-float relative z-10">🏆</div>
+                    <div class="relative z-10">
+                        <h3 id="resultRankTitle" class="text-2xl sm:text-3xl font-bold text-slate-900">สุดยอดนักเคมีพอลิเมอร์!</h3>
+                        <p id="resultSummaryText" class="text-slate-600 mt-1 text-base">คุณทำคะแนนได้ 8 เต็ม 8 คะแนน</p>
+                    </div>
+                    <div class="inline-flex items-center gap-4 bg-amber-50 border-2 border-slate-800 rounded-2xl px-6 py-3 relative z-10">
+                        <div>
+                            <div class="text-xs font-bold text-slate-500">คะแนนรวม</div>
+                            <div id="resultFinalScore" class="text-2xl font-bold text-slate-900">8 / 8</div>
+                        </div>
+                        <div class="w-0.5 h-8 bg-slate-300"></div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-500">ตอบถูกติดกันสูงสุด</div>
+                            <div id="resultBestStreak" class="text-2xl font-bold text-orange-600">🔥 8</div>
+                        </div>
+                    </div>
+                    <div class="pt-2 relative z-10">
+                        <button onclick="restartQuiz()" class="cartoon-btn bg-emerald-300 hover:bg-emerald-400 px-7 py-3 font-bold text-slate-900 text-base">
+                            🔄 เล่นอีกครั้ง
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-4 mt-10 text-center text-xs sm:text-sm text-slate-500">
+        <p class="font-semibold">🧪 Phatthana Lab — สื่อช่วยสอนวิทยาศาสตร์ ม.3 เรื่องโครงสร้างและสมบัติของพอลิเมอร์</p>
+    </footer>
+
+    <!-- =========================================================
+         JAVASCRIPT: Web Audio, Custom Polymer Engine, Lab Sim & Games
+         ========================================================= -->
+    <script>
+        /* =========================================================
+           1. WEB AUDIO API SOUND EFFECTS ENGINE
+           ========================================================= */
+        let audioCtx = null;
+        let soundEnabled = true;
+        let lastHeatSoundTime = 0;
+
+        function initAudio() {
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) audioCtx = new AudioContext();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (e) {
+                console.warn('Web Audio not supported:', e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundIcon').textContent = soundEnabled ? '🔊' : '🔇';
+            document.getElementById('soundLabel').textContent = soundEnabled ? 'เสียง: เปิด' : 'เสียง: ปิด';
+            if (soundEnabled) playSound('pop');
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            try {
+                if (type === 'pop') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(380, now);
+                    osc.frequency.exponentialRampToValueAtTime(680, now + 0.08);
+                    gain.gain.setValueAtTime(0.16, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'sizzle') {
+                    if (now - lastHeatSoundTime < 0.18) return;
+                    lastHeatSoundTime = now;
+                    const bufferSize = audioCtx.sampleRate * 0.12;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(2200, now);
+                    const gain = audioCtx.createGain();
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    noise.start(now);
+                } else if (type === 'boing') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(190, now);
+                    osc.frequency.exponentialRampToValueAtTime(420, now + 0.16);
+                    osc.frequency.exponentialRampToValueAtTime(250, now + 0.32);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'crack') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.exponentialRampToValueAtTime(75, now + 0.1);
+                    gain.gain.setValueAtTime(0.14, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } else if (type === 'correct') {
+                    const notes = [523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.2);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.22);
+                    });
+                } else if (type === 'wrong') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(210, now);
+                    osc.frequency.linearRampToValueAtTime(150, now + 0.22);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (err) {
+                console.warn('Sound play error:', err);
+            }
+        }
+
+        /* =========================================================
+           2. POLYMER DATA MODELS (3 Presets + Dynamic Custom Polymer)
+           ========================================================= */
+        const POLYMERS = {
+            linear: {
+                id: 'linear',
+                behaviorType: 'linear',
+                nameTh: 'พอลิเมอร์แบบเส้น (Linear)',
+                shortName: 'แบบเส้น',
+                plasticType: 'เทอร์มอพลาสติก',
+                plasticBadgeClass: 'bg-sky-100 text-sky-900',
+                recyclable: true,
+                density: 85,
+                densityLabel: 'สูง (85%)',
+                flexibility: 55,
+                flexLabel: 'ปานกลาง (55%)',
+                meltScore: 75,
+                meltLabel: 'สูง (~140°C)',
+                meltTemp: 140,
+                baseColor: '#38bdf8',
+                bondColor: '#0284c7',
+                examples: [
+                    { emoji: '🧴', name: 'ขวดนม HDPE', desc: 'แข็ง เหนียว ทนทาน' },
+                    { emoji: '🚰', name: 'ท่อน้ำ PVC', desc: 'คงรูป ทนแรงดัน' },
+                    { emoji: '🧵', name: 'เชือกไนลอน', desc: 'รับแรงดึงได้ดีมาก' }
+                ]
+            },
+            branched: {
+                id: 'branched',
+                behaviorType: 'branched',
+                nameTh: 'พอลิเมอร์แบบกิ่ง (Branched)',
+                shortName: 'แบบกิ่ง',
+                plasticType: 'เทอร์มอพลาสติก',
+                plasticBadgeClass: 'bg-emerald-100 text-emerald-900',
+                recyclable: true,
+                density: 40,
+                densityLabel: 'ต่ำ (40%)',
+                flexibility: 90,
+                flexLabel: 'สูงมาก (90%)',
+                meltScore: 40,
+                meltLabel: 'ต่ำ (~105°C)',
+                meltTemp: 105,
+                baseColor: '#34d399',
+                branchColor: '#6ee7b7',
+                bondColor: '#059669',
+                examples: [
+                    { emoji: '🛍️', name: 'ถุงเย็น LDPE', desc: 'นิ่ม ยืดหยุ่น ใส' },
+                    { emoji: '🌯', name: 'ฟิล์มห่ออาหาร', desc: 'บาง ยืดเกาะภาชนะ' },
+                    { emoji: '🍯', name: 'ขวดบีบซอส', desc: 'บีบง่าย คืนรูปได้' }
+                ]
+            },
+            crosslinked: {
+                id: 'crosslinked',
+                behaviorType: 'crosslinked',
+                nameTh: 'พอลิเมอร์แบบร่างแห (Cross-linked)',
+                shortName: 'แบบร่างแห',
+                plasticType: 'เทอร์มอเซต',
+                plasticBadgeClass: 'bg-purple-100 text-purple-900',
+                recyclable: false,
+                density: 92,
+                densityLabel: 'สูงมาก (92%)',
+                flexibility: 15,
+                flexLabel: 'ต่ำ / แข็งเปราะ (15%)',
+                meltScore: 100,
+                meltLabel: 'ไม่หลอมเหลว (>265°C ไหม้)',
+                meltTemp: 999,
+                baseColor: '#a78bfa',
+                bondColor: '#6d28d9',
+                crossColor: '#f59e0b',
+                examples: [
+                    { emoji: '🍽️', name: 'จานเมลามีน', desc: 'ทนร้อน คงรูปดี' },
+                    { emoji: '🍳', name: 'ด้ามกระทะเบกาไลต์', desc: 'ไม่นำความร้อน ไม่ละลาย' },
+                    { emoji: '🔌', name: 'ปลั๊กไฟ / อีพ็อกซี', desc: 'แข็งแกร่ง ฉนวนไฟฟ้า' }
+                ]
+            }
+        };
+
+        // Stores the real structure created by the user in Polymer Builder
+        let customPolymer = null;
+
+        /* =========================================================
+           3. APP & SIMULATION STATE
+           ========================================================= */
+        let currentTab = 'lab';
+        let currentPolymerId = 'linear'; // 'linear' | 'branched' | 'crosslinked' | 'custom'
+        let temperature = 25;
+        let stretchTimer = 0;
+        let stretchPhase = 0;
+        let animTime = 0;
+        let hideAnswersMode = false;
+        let projectorMode = false;
+
+        // Lab Canvas & Particles
+        let canvas, ctx;
+        let canvasW = 600, canvasH = 410;
+        let chains = [];
+        let customSimGraph = null; // Holds scaled custom nodes & bonds for real physics simulation
+        let smokeParticles = [];
+        let flameParticles = [];
+        let emberParticles = [];
+
+        /* =========================================================
+           4. TAB NAVIGATION & TEACHER PRESENTATION MODES
+           ========================================================= */
+        function switchTab(tabName) {
+            playSound('pop');
+            currentTab = tabName;
+
+            ['lab', 'builder', 'recycle', 'compare', 'quiz'].forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                const btn = document.getElementById(`tabBtn-${t}`);
+                if (t === tabName) {
+                    sec.classList.remove('hidden');
+                    btn.classList.add('tab-active');
+                } else {
+                    sec.classList.add('hidden');
+                    btn.classList.remove('tab-active');
+                }
+            });
+
+            if (tabName === 'lab') {
+                requestAnimationFrame(() => resizeCanvas());
+            } else if (tabName === 'builder') {
+                requestAnimationFrame(() => resizeBuilderCanvas());
+            }
+        }
+
+        function toggleHideAnswers() {
+            playSound('pop');
+            hideAnswersMode = !hideAnswersMode;
+            const mask = document.getElementById('teacherAnswerMask');
+            const dash = document.getElementById('propertyDashboardCard');
+            const exCard = document.getElementById('exampleCardContainer');
+            const btnText = document.getElementById('hideAnswerText');
+            const btnIcon = document.getElementById('hideAnswerIcon');
+
+            if (hideAnswersMode) {
+                mask.classList.remove('hidden');
+                dash.classList.add('hidden');
+                exCard.classList.add('hidden');
+                btnIcon.textContent = '🙈';
+                btnText.textContent = 'กำลังซ่อนเฉลย';
+            } else {
+                mask.classList.add('hidden');
+                dash.classList.remove('hidden');
+                exCard.classList.remove('hidden');
+                btnIcon.textContent = '👁️';
+                btnText.textContent = 'ซ่อนเฉลย (ทายผล)';
+            }
+        }
+
+        function toggleProjectorMode() {
+            playSound('pop');
+            projectorMode = !projectorMode;
+            const tank = document.getElementById('canvasContainer');
+            const tankCol = document.getElementById('labTankCol');
+            const rightCol = document.getElementById('labRightCol');
+            const btnText = document.getElementById('projectorText');
+
+            if (projectorMode) {
+                tank.classList.add('projector-tall');
+                tankCol.classList.remove('lg:col-span-7');
+                tankCol.classList.add('lg:col-span-12');
+                rightCol.classList.remove('lg:col-span-5');
+                rightCol.classList.add('lg:col-span-12');
+                btnText.textContent = 'ย่อกลับปกติ';
+            } else {
+                tank.classList.remove('projector-tall');
+                tankCol.classList.remove('lg:col-span-12');
+                tankCol.classList.add('lg:col-span-7');
+                rightCol.classList.remove('lg:col-span-12');
+                rightCol.classList.add('lg:col-span-5');
+                btnText.textContent = 'โหมดสอนหน้าชั้น';
+            }
+            setTimeout(resizeCanvas, 60);
+        }
+
+        /* =========================================================
+           5. POLYMER SELECTION & DASHBOARD UPDATES
+           ========================================================= */
+        function getActivePolymerData() {
+            if (currentPolymerId === 'custom' && customPolymer) {
+                return customPolymer;
+            }
+            return POLYMERS[currentPolymerId] || POLYMERS.linear;
+        }
+
+        function selectPolymer(id) {
+            if (id === 'custom' && !customPolymer) return;
+            playSound('pop');
+            currentPolymerId = id;
+            stretchTimer = 0;
+            smokeParticles = [];
+
+            // Highlight active polymer button
+            const btnColors = {
+                linear: 'bg-sky-200',
+                branched: 'bg-emerald-200',
+                crosslinked: 'bg-purple-200',
+                custom: 'bg-amber-200'
+            };
+            ['linear', 'branched', 'crosslinked', 'custom'].forEach(pid => {
+                const btn = document.getElementById(`polyBtn-${pid}`);
+                if (!btn) return;
+                btn.classList.remove('bg-sky-200', 'bg-emerald-200', 'bg-purple-200', 'bg-amber-200', 'bg-white');
+                btn.classList.add(pid === id ? btnColors[pid] : 'bg-white');
+            });
+
+            if (id === 'custom' && customPolymer) {
+                buildCustomSimulationGraph();
+            } else {
+                buildPolymerChains();
+            }
+            updateDashboardUI();
+        }
+
+        function onTemperatureChange(val) {
+            const newTemp = parseInt(val, 10);
+            if (newTemp > temperature && newTemp > 90) {
+                playSound('sizzle');
+            }
+            temperature = newTemp;
+            updateDashboardUI();
+        }
+
+        function setTemperature(val) {
+            playSound(val > 100 ? 'sizzle' : 'pop');
+            temperature = val;
+            document.getElementById('tempSlider').value = val;
+            updateDashboardUI();
+        }
+
+        function triggerStretchTest() {
+            stretchTimer = 110;
+            stretchPhase = 0;
+            const activePoly = getActivePolymerData();
+            if (activePoly.behaviorType === 'crosslinked') {
+                playSound('crack');
+            } else {
+                playSound('boing');
+            }
+            updateLiveObservation();
+        }
+
+        function updateDashboardUI() {
+            const p = getActivePolymerData();
+            document.getElementById('simTitle').textContent = `🔬 ตู้จำลองโมเลกุล: ${p.nameTh}`;
+
+            // Temperature readout styling
+            const readout = document.getElementById('tempReadout');
+            readout.textContent = `${temperature}°C`;
+            readout.className = 'font-cartoon font-bold text-base sm:text-xl px-3 py-0.5 rounded-xl border-2 border-slate-800 ' +
+                (temperature < 80 ? 'bg-sky-200 text-slate-900' : temperature < 180 ? 'bg-amber-300 text-slate-900' : 'bg-rose-500 text-white');
+
+            // Badges
+            const bType = document.getElementById('badgePlasticType');
+            bType.textContent = p.plasticType;
+            bType.className = `text-xs font-bold px-2.5 py-1 rounded-full border-2 border-slate-800 ${p.plasticBadgeClass}`;
+
+            const bRec = document.getElementById('badgeRecycle');
+            if (p.recyclable) {
+                bRec.textContent = '♻️ รีไซเคิลได้';
+                bRec.className = 'text-xs font-bold px-2.5 py-1 rounded-full border-2 border-slate-800 bg-emerald-100 text-emerald-900';
+            } else {
+                bRec.textContent = '🚫 รีไซเคิลไม่ได้';
+                bRec.className = 'text-xs font-bold px-2.5 py-1 rounded-full border-2 border-slate-800 bg-rose-100 text-rose-900';
+            }
+
+            // Custom Polymer Extra Summary Banner
+            const customBanner = document.getElementById('customStatsBanner');
+            if (currentPolymerId === 'custom' && customPolymer) {
+                customBanner.classList.remove('hidden');
+                document.getElementById('customNodeBondSummary').textContent =
+                    `🧬 โครงสร้างของคุณ: มอนอเมอร์ ${customPolymer.nodes.length} ตัว | พันธะ ${customPolymer.mainBonds.length} เส้น | สะพานกำมะถัน ${customPolymer.sulfurBonds.length} จุด`;
+            } else {
+                customBanner.classList.add('hidden');
+            }
+
+            // Progress bars
+            document.getElementById('valDensity').textContent = p.densityLabel;
+            document.getElementById('barDensity').style.width = `${p.density}%`;
+
+            document.getElementById('valFlex').textContent = p.flexLabel;
+            document.getElementById('barFlex').style.width = `${p.flexibility}%`;
+
+            document.getElementById('valMelt').textContent = p.meltLabel;
+            document.getElementById('barMelt').style.width = `${p.meltScore}%`;
+
+            // Example Cards
+            const grid = document.getElementById('exampleCardsGrid');
+            grid.innerHTML = p.examples.map(ex => `
+                <div class="bg-slate-50 border-2 border-slate-800 rounded-2xl p-2 sm:p-2.5 text-center hover:-translate-y-0.5 transition-transform">
+                    <div class="text-2xl sm:text-3xl mb-1">${ex.emoji}</div>
+                    <div class="font-bold text-xs sm:text-sm text-slate-900 leading-tight">${ex.name}</div>
+                    <div class="text-[11px] text-slate-600 mt-0.5 leading-tight">${ex.desc}</div>
+                </div>
+            `).join('');
+
+            updateLiveObservation();
+        }
+
+        function updateLiveObservation() {
+            const badge = document.getElementById('simStateBadge');
+            const desc = document.getElementById('liveExplanation');
+            const activePoly = getActivePolymerData();
+            const bType = activePoly.behaviorType;
+            const isCustom = (currentPolymerId === 'custom');
+            const prefix = isCustom ? '[โมเลกุลที่คุณต่อเอง] ' : '';
+
+            if (stretchTimer > 0) {
+                if (bType === 'linear') {
+                    badge.textContent = '↔️ ทดสอบแรงดึง: เหนียว แข็งแรง!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-200 text-slate-900';
+                    desc.textContent = prefix + 'โครงสร้างแบบเส้นเรียงตัวต่อเนื่องและมีแรงยึดเหนี่ยวระหว่างสายโซ่สูง จึงต้านแรงดึงได้ดี มีความเหนียวและยืดได้เล็กน้อยก่อนคืนรูป!';
+                } else if (bType === 'branched') {
+                    badge.textContent = '↔️ ทดสอบแรงดึง: ยืดหยุ่นสูงมาก!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-emerald-200 text-slate-900';
+                    desc.textContent = prefix + 'กิ่งที่แตกแขนงออกมาทำให้เกิดช่องว่างระหว่างโมเลกุลมาก โครงสร้างจึงขยับและยืดออกได้ง่ายมาก (ยืดหยุ่นสูงเหมือนถุงเย็น LDPE)!';
+                } else {
+                    badge.textContent = '↔️ ทดสอบแรงดึง: แข็งแกร่ง คงรูป (แต่เปราะ)!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-purple-200 text-slate-900';
+                    desc.textContent = prefix + 'สะพานกำมะถัน (Cross-link) ยึดตรึงมอนอเมอร์ไว้แน่นจนแทบไม่ขยับเลย! ทำให้คงรูปแข็งแกร่งมาก แต่ถ้ากระแทกแรงเกินไปจะแตกเปราะทันที';
+                }
+                return;
+            }
+
+            if (bType === 'linear') {
+                if (temperature < 110) {
+                    badge.textContent = '❄️ สถานะ: ของแข็ง เรียงชิดเป็นระเบียบ';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-100 text-sky-900';
+                    desc.textContent = prefix + 'ที่อุณหภูมิปกติ สายโซ่แบบเส้นเรียงตัวต่อเนื่องไม่มีกิ่งเกะกะ ทำให้เข้าชิดกันได้ดี มีความหนาแน่นสูง แข็งแรง และเหนียว';
+                } else if (temperature < 140) {
+                    badge.textContent = '🌡️ สถานะ: เริ่มอ่อนตัว';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-100 text-amber-900';
+                    desc.textContent = prefix + 'เมื่อได้รับความร้อนเพิ่มขึ้น โมเลกุลเริ่มสั่นแรงขึ้นและแรงยึดเหนี่ยวระหว่างสายโซ่เริ่มลดลง เตรียมเข้าสู่จุดหลอมเหลว (~140°C)';
+                } else {
+                    badge.textContent = '🔥 สถานะ: หลอมเหลว (สายโซ่เลื่อนไถล)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-rose-200 text-rose-900';
+                    desc.textContent = prefix + 'ร้อนเกินจุดหลอมเหลวแล้ว! เพราะไม่มีสะพานกำมะถันยึดไว้ มอนอเมอร์และสายโซ่จึงแยกเคลื่อนที่เลื่อนไถลผ่านกันได้ (หลอมเหลว) และนำมารีไซเคิลใหม่ได้!';
+                }
+            } else if (bType === 'branched') {
+                if (temperature < 80) {
+                    badge.textContent = '❄️ สถานะ: ของแข็งอ่อนนุ่ม (มีกิ่งกั้น)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-emerald-100 text-emerald-900';
+                    desc.textContent = prefix + 'กิ่งก้านที่แตกแขนงออกมาคอยกั้นไม่ให้สายโซ่หลักเข้ามาชิดกันได้ ทำให้มีความหนาแน่นต่ำ อ่อนนุ่ม และยืดหยุ่นได้ดี';
+                } else if (temperature < 105) {
+                    badge.textContent = '🌡️ สถานะ: อ่อนตัวเร็วมาก';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-100 text-amber-900';
+                    desc.textContent = prefix + 'เพราะมีช่องว่างระหว่างสายโซ่มากและแรงยึดเหนี่ยวต่ำ พอลิเมอร์แบบกิ่งจึงอ่อนตัวได้เร็วกว่าแบบเส้นมาก!';
+                } else {
+                    badge.textContent = '🔥 สถานะ: หลอมเหลวได้ง่าย (~105°C)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-rose-200 text-rose-900';
+                    desc.textContent = prefix + 'หลอมเหลวแล้ว! เพราะไม่มีสะพานกำมะถันยึดตรึง มอนอเมอร์และกิ่งก้านจึงแยกออกจากกันและไหลเลื่อนได้ง่าย จัดเป็นเทอร์มอพลาสติกที่หลอมใหม่ได้!';
+                }
+            } else {
+                // Cross-linked
+                if (temperature < 140) {
+                    badge.textContent = '🛡️ สถานะ: ของแข็งคงรูป (ล็อกแน่น 3 มิติ)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-purple-100 text-purple-900';
+                    desc.textContent = prefix + 'สะพานกำมะถัน (Cross-link) สีเหลืองทองยึดตรึงมอนอเมอร์เข้าด้วยกันเป็นโครงข่ายแข็งแรง ทำให้คงรูปดีเยี่ยมและทนความร้อนสูง';
+                } else if (temperature < 265) {
+                    badge.textContent = '💪 สถานะ: ทนความร้อน! ไม่หลอมเหลว';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-200 text-amber-900';
+                    desc.textContent = prefix + 'สังเกตสิ! แม้เปลวไฟสีฟ้าจะร้อนแรงขนาดไหน โมเลกุลก็ "ไม่แยกออกจากกันและไม่หลอมเหลว" เพราะสะพานกำมะถันล็อกไว้แน่น!';
+                } else {
+                    badge.textContent = '💨 สถานะ: ไหม้เกรียม / สลายตัว!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-slate-800 text-white';
+                    desc.textContent = prefix + 'ร้อนจัดเกิน 265°C แล้ว! พอลิเมอร์แบบร่างแห (เทอร์มอเซต) จะไม่หลอมเป็นของเหลว แต่จะเกิดรอยไหม้เกรียมและสลายตัวทันที จึงหลอมรีไซเคิลไม่ได้!';
+                }
+            }
+        }
+
+        /* =========================================================
+           6. 2D CARTOON POLYMER SIMULATION (Presets + REAL Custom Graph!)
+           ========================================================= */
+        function resizeCanvas() {
+            const container = document.getElementById('canvasContainer');
+            if (!container || !canvas) return;
+            const rect = container.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            canvasW = rect.width;
+            canvasH = rect.height;
+            canvas.width = Math.floor(canvasW * dpr);
+            canvas.height = Math.floor(canvasH * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            if (currentPolymerId === 'custom' && customPolymer) {
+                buildCustomSimulationGraph();
+            } else {
+                buildPolymerChains();
+            }
+        }
+
+        /* Build the 3 standard preset polymer arrangements */
+        function buildPolymerChains() {
+            chains = [];
+            const marginX = Math.max(46, canvasW * 0.11);
+            const usableW = canvasW - marginX * 2;
+            const nodesPerChain = canvasW < 420 ? 6 : 7;
+            const stepX = usableW / (nodesPerChain - 1);
+            const topY = 48;
+            const bottomY = canvasH - 102;
+            const usableH = bottomY - topY;
+            const numChains = currentPolymerId === 'branched' ? 2 : 3;
+            const stepY = usableH / (numChains + 1);
+
+            for (let r = 0; r < numChains; r++) {
+                const baseY = topY + stepY * (r + 1);
+                const nodes = [];
+                for (let c = 0; c < nodesPerChain; c++) {
+                    nodes.push({
+                        baseX: marginX + c * stepX,
+                        baseY: baseY,
+                        x: marginX + c * stepX,
+                        y: baseY,
+                        phase: r * 1.3 + c * 0.7
+                    });
+                }
+
+                const branches = [];
+                if (currentPolymerId === 'branched') {
+                    const branchCols = [1, 3, 4].filter(idx => idx < nodesPerChain);
+                    branchCols.forEach((colIdx, bIdx) => {
+                        const dir = (r + bIdx) % 2 === 0 ? -1 : 1;
+                        branches.push({
+                            parentIdx: colIdx,
+                            offsetX: (bIdx % 2 === 0 ? 8 : -8),
+                            offsetY: dir * Math.min(34, stepY * 0.42),
+                            x: 0,
+                            y: 0,
+                            phase: bIdx * 1.1 + r
+                        });
+                    });
+                }
+
+                chains.push({
+                    nodes,
+                    branches,
+                    slideOffset: 0,
+                    slideSpeed: (r % 2 === 0 ? 1 : -1) * (0.45 + r * 0.12),
+                    driftY: 0
+                });
+            }
+        }
+
+        /* Auto-fit, center & scale the user's REAL custom polymer into the Lab tank! */
+        function buildCustomSimulationGraph() {
+            if (!customPolymer || !customPolymer.nodes.length) return;
+
+            const srcNodes = customPolymer.nodes;
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            srcNodes.forEach(n => {
+                if (n.x < minX) minX = n.x;
+                if (n.x > maxX) maxX = n.x;
+                if (n.y < minY) minY = n.y;
+                if (n.y > maxY) maxY = n.y;
+            });
+
+            const srcW = Math.max(80, maxX - minX);
+            const srcH = Math.max(60, maxY - minY);
+            const padX = Math.max(52, canvasW * 0.13);
+            const topPad = 46;
+            const bottomPad = 104; // Keep clear of Bunsen burners at bottom
+            const availW = Math.max(120, canvasW - padX * 2);
+            const availH = Math.max(110, canvasH - topPad - bottomPad);
+
+            const scale = Math.min(1.25, Math.min(availW / srcW, availH / srcH));
+            const centerX = canvasW / 2;
+            const centerY = topPad + availH / 2;
+            const srcCenterX = (minX + maxX) / 2;
+            const srcCenterY = (minY + maxY) / 2;
+
+            // Find connected components so separate chains slide independently when melted!
+            const adj = {};
+            srcNodes.forEach(n => { adj[n.id] = []; });
+            customPolymer.mainBonds.forEach(b => {
+                if (adj[b.a] && adj[b.b]) {
+                    adj[b.a].push(b.b);
+                    adj[b.b].push(b.a);
+                }
+            });
+            // If sulfur cross-links exist, they lock components together
+            customPolymer.sulfurBonds.forEach(b => {
+                if (adj[b.a] && adj[b.b]) {
+                    adj[b.a].push(b.b);
+                    adj[b.b].push(b.a);
+                }
+            });
+
+            const compMap = {};
+            let compCount = 0;
+            srcNodes.forEach(n => {
+                if (compMap[n.id] === undefined) {
+                    const queue = [n.id];
+                    compMap[n.id] = compCount;
+                    while (queue.length > 0) {
+                        const curr = queue.shift();
+                        (adj[curr] || []).forEach(nxt => {
+                            if (compMap[nxt] === undefined) {
+                                compMap[nxt] = compCount;
+                                queue.push(nxt);
+                            }
+                        });
+                    }
+                    compCount++;
+                }
+            });
+
+            const simNodes = srcNodes.map((n, idx) => {
+                const bx = centerX + (n.x - srcCenterX) * scale;
+                const by = centerY + (n.y - srcCenterY) * scale;
+                return {
+                    id: n.id,
+                    baseX: bx,
+                    baseY: by,
+                    x: bx,
+                    y: by,
+                    color: n.color,
+                    compId: compMap[n.id],
+                    phase: idx * 0.85,
+                    meltDriftAngle: (idx * 1.9) % (Math.PI * 2),
+                    meltDriftX: 0,
+                    meltDriftY: 0
+                };
+            });
+
+            const nodeById = {};
+            simNodes.forEach(sn => { nodeById[sn.id] = sn; });
+
+            customSimGraph = {
+                nodes: simNodes,
+                nodeById,
+                mainBonds: customPolymer.mainBonds.map(b => ({ ...b })),
+                sulfurBonds: customPolymer.sulfurBonds.map(b => ({ ...b })),
+                compCount
+            };
+        }
+
+        /* Draw a cute cartoon monomer face with warm firelight reflection */
+        function drawCartoonMonomer(x, y, radius, fillColor, expression, isCharred, fireGlowIntensity) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.fillStyle = isCharred ? '#334155' : fillColor;
+            ctx.fill();
+
+            if (fireGlowIntensity > 0.05) {
+                const rimGrad = ctx.createRadialGradient(0, radius * 0.65, radius * 0.1, 0, radius * 0.25, radius * 1.05);
+                rimGrad.addColorStop(0, `rgba(255, 160, 45, ${0.52 * fireGlowIntensity})`);
+                rimGrad.addColorStop(0.65, `rgba(251, 113, 133, ${0.18 * fireGlowIntensity})`);
+                rimGrad.addColorStop(1, 'rgba(255, 160, 45, 0)');
+                ctx.fillStyle = rimGrad;
+                ctx.fill();
+            }
+
+            if (isCharred) {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
+                ctx.beginPath();
+                ctx.arc(-radius * 0.35, radius * 0.45, radius * 0.26, 0, Math.PI * 2);
+                ctx.arc(radius * 0.42, -radius * 0.28, radius * 0.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.lineWidth = 2.4;
+            ctx.strokeStyle = '#1e293b';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(-radius * 0.32, -radius * 0.34, radius * 0.24, radius * 0.14, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = isCharred ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.68)';
+            ctx.fill();
+
+            if (!isCharred) {
+                ctx.fillStyle = 'rgba(251, 113, 133, 0.55)';
+                ctx.beginPath();
+                ctx.arc(-radius * 0.48, radius * 0.15, radius * 0.16, 0, Math.PI * 2);
+                ctx.arc(radius * 0.48, radius * 0.15, radius * 0.16, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.strokeStyle = isCharred ? '#f8fafc' : '#1e293b';
+            ctx.fillStyle = isCharred ? '#f8fafc' : '#1e293b';
+            ctx.lineWidth = 1.8;
+            ctx.lineCap = 'round';
+
+            const eyeX = radius * 0.32;
+            const eyeY = -radius * 0.06;
+
+            if (expression === 'charred') {
+                [-eyeX, eyeX].forEach(ex => {
+                    ctx.beginPath();
+                    ctx.moveTo(ex - 2.6, eyeY - 2.6);
+                    ctx.lineTo(ex + 2.6, eyeY + 2.6);
+                    ctx.moveTo(ex + 2.6, eyeY - 2.6);
+                    ctx.lineTo(ex - 2.6, eyeY + 2.6);
+                    ctx.stroke();
+                });
+                ctx.beginPath();
+                ctx.arc(0, radius * 0.44, radius * 0.22, Math.PI * 1.15, Math.PI * 1.85);
+                ctx.stroke();
+            } else if (expression === 'melted') {
+                [-eyeX, eyeX].forEach(ex => {
+                    ctx.beginPath();
+                    ctx.arc(ex, eyeY, 2.7, 0, Math.PI * 1.7);
+                    ctx.stroke();
+                });
+                ctx.beginPath();
+                ctx.ellipse(0, radius * 0.34, radius * 0.18, radius * 0.22, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#fb7185';
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(radius * 0.72, -radius * 0.58);
+                ctx.quadraticCurveTo(radius * 0.98, -radius * 0.18, radius * 0.72, -radius * 0.08);
+                ctx.quadraticCurveTo(radius * 0.46, -radius * 0.18, radius * 0.72, -radius * 0.58);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fill();
+            } else if (expression === 'sweat') {
+                ctx.beginPath();
+                ctx.arc(-eyeX, eyeY, 2.2, 0, Math.PI * 2);
+                ctx.arc(eyeX, eyeY, 2.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.24, radius * 0.3);
+                ctx.quadraticCurveTo(0, radius * 0.2, radius * 0.24, radius * 0.3);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(radius * 0.72, -radius * 0.52);
+                ctx.quadraticCurveTo(radius * 0.96, -radius * 0.16, radius * 0.72, -radius * 0.08);
+                ctx.quadraticCurveTo(radius * 0.48, -radius * 0.16, radius * 0.72, -radius * 0.52);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fill();
+            } else if (expression === 'strained') {
+                ctx.beginPath();
+                ctx.moveTo(-eyeX - 2.6, eyeY - 2.6);
+                ctx.lineTo(-eyeX + 2.2, eyeY);
+                ctx.lineTo(-eyeX - 2.6, eyeY + 2.6);
+                ctx.moveTo(eyeX + 2.6, eyeY - 2.6);
+                ctx.lineTo(eyeX - 2.2, eyeY);
+                ctx.lineTo(eyeX + 2.6, eyeY + 2.6);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.26, radius * 0.34);
+                ctx.lineTo(radius * 0.26, radius * 0.34);
+                ctx.stroke();
+            } else if (expression === 'stretched') {
+                ctx.beginPath();
+                ctx.arc(-eyeX, eyeY, 2.8, 0, Math.PI * 2);
+                ctx.arc(eyeX, eyeY, 2.8, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, radius * 0.34, radius * 0.18, 0, Math.PI * 2);
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.arc(-eyeX, eyeY, 2.3, 0, Math.PI * 2);
+                ctx.arc(eyeX, eyeY, 2.3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(0, radius * 0.16, radius * 0.24, 0.18 * Math.PI, 0.82 * Math.PI);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        /* Bunsen Burner & Glowing Flames */
+        function getBurnerNozzles() {
+            const count = 3;
+            const spread = Math.min(canvasW * 0.64, 340);
+            const startX = (canvasW - spread) / 2;
+            const step = spread / (count - 1);
+            const nozzleY = canvasH - 22;
+            const nozzles = [];
+            for (let i = 0; i < count; i++) nozzles.push({ x: startX + i * step, y: nozzleY });
+            return nozzles;
+        }
+
+        function drawAmbientFireGlow(intensity, blueRatio) {
+            if (intensity <= 0.01) return;
+            ctx.save();
+            const glowH = 115 + intensity * 155;
+            const bgGrad = ctx.createLinearGradient(0, canvasH - glowH, 0, canvasH);
+            bgGrad.addColorStop(0, 'rgba(255, 140, 40, 0)');
+            bgGrad.addColorStop(0.55, `rgba(251, 146, 60, ${0.10 + intensity * 0.16})`);
+            bgGrad.addColorStop(0.88, `rgba(239, 68, 68, ${0.16 + intensity * 0.22})`);
+            bgGrad.addColorStop(1, blueRatio > 0.1
+                ? `rgba(56, 189, 248, ${0.18 + blueRatio * 0.22})`
+                : `rgba(249, 115, 22, ${0.22 + intensity * 0.24})`);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, canvasH - glowH, canvasW, glowH);
+            ctx.restore();
+        }
+
+        function drawHeatShimmer(nozzles, intensity) {
+            if (intensity < 0.2) return;
+            ctx.save();
+            ctx.strokeStyle = `rgba(255, 237, 213, ${0.22 + intensity * 0.22})`;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            nozzles.forEach((nz, idx) => {
+                for (let s = 0; s < 2; s++) {
+                    const phase = (animTime * 0.07 + idx * 1.7 + s * 3.1);
+                    const startY = nz.y - 36 - intensity * 48 - s * 22;
+                    const waveH = 38 + intensity * 26;
+                    ctx.beginPath();
+                    for (let dy = 0; dy <= waveH; dy += 6) {
+                        const wx = nz.x + (s === 0 ? -12 : 12) + Math.sin(phase - dy * 0.14) * (4 + intensity * 3);
+                        const wy = startY - dy;
+                        if (dy === 0) ctx.moveTo(wx, wy);
+                        else ctx.lineTo(wx, wy);
+                    }
+                    ctx.stroke();
+                }
+            });
+            ctx.restore();
+        }
+
+        function drawBunsenBurnerHardware(nozzles, intensity, blueRatio) {
+            ctx.save();
+            const railY = canvasH - 12;
+            const railGrad = ctx.createLinearGradient(0, railY, 0, canvasH);
+            railGrad.addColorStop(0, '#64748b');
+            railGrad.addColorStop(0.5, '#334155');
+            railGrad.addColorStop(1, '#1e293b');
+            ctx.fillStyle = railGrad;
+            ctx.fillRect(0, railY, canvasW, 12);
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(0, railY);
+            ctx.lineTo(canvasW, railY);
+            ctx.stroke();
+
+            nozzles.forEach(nz => {
+                const nw = 28, nh = 18;
+                const nx = nz.x - nw / 2, ny = nz.y - 4;
+                const bodyGrad = ctx.createLinearGradient(nx, ny, nx + nw, ny);
+                bodyGrad.addColorStop(0, '#475569');
+                bodyGrad.addColorStop(0.35, '#cbd5e1');
+                bodyGrad.addColorStop(0.7, '#64748b');
+                bodyGrad.addColorStop(1, '#334155');
+
+                ctx.fillStyle = bodyGrad;
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2.4;
+                ctx.beginPath();
+                ctx.roundRect(nx + 2, ny, nw - 4, nh, [4, 4, 2, 2]);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.beginPath();
+                ctx.roundRect(nx - 2, ny - 4, nw + 4, 7, 3.5);
+                ctx.fill();
+                ctx.stroke();
+
+                if (intensity > 0.05) {
+                    ctx.beginPath();
+                    ctx.ellipse(nz.x, ny - 3, nw * 0.42, 2.5, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = blueRatio > 0.2
+                        ? `rgba(56, 189, 248, ${0.65 + blueRatio * 0.35})`
+                        : `rgba(251, 146, 60, ${0.55 + intensity * 0.45})`;
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.arc(nz.x, ny + 8, 2.8, 0, Math.PI * 2);
+                ctx.fillStyle = '#0f172a';
+                ctx.fill();
+            });
+            ctx.restore();
+        }
+
+        function updateAndDrawGlowingFlames(nozzles, intensity, blueRatio) {
+            if (intensity > 0.02) {
+                nozzles.forEach((nz, idx) => {
+                    const spawnCount = intensity > 0.55 ? 3 : 2;
+                    for (let i = 0; i < spawnCount; i++) {
+                        const isBlueCore = blueRatio > 0 && Math.random() < (0.28 + blueRatio * 0.32);
+                        flameParticles.push({
+                            x: nz.x + (Math.random() - 0.5) * (isBlueCore ? 10 : 18),
+                            y: nz.y - 6,
+                            vx: (Math.random() - 0.5) * 0.45,
+                            vy: -(1.6 + Math.random() * 1.9 + intensity * 2.2) * (isBlueCore ? 0.72 : 1),
+                            radius: (isBlueCore ? 7 : 11) + Math.random() * (6 + intensity * 9),
+                            life: 1.0,
+                            decay: (isBlueCore ? 0.048 : 0.028) + Math.random() * 0.018,
+                            isBlue: isBlueCore,
+                            swayPhase: Math.random() * Math.PI * 2 + idx
+                        });
+                    }
+                    if (Math.random() < 0.14 + intensity * 0.28) {
+                        emberParticles.push({
+                            x: nz.x + (Math.random() - 0.5) * 20,
+                            y: nz.y - 16 - Math.random() * 20,
+                            vx: (Math.random() - 0.5) * 0.9,
+                            vy: -(1.5 + Math.random() * 2.2 + intensity * 1.5),
+                            size: 1.8 + Math.random() * 2.2,
+                            life: 1.0,
+                            decay: 0.012 + Math.random() * 0.012,
+                            phase: Math.random() * Math.PI * 2
+                        });
+                    }
+                });
+            }
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+
+            if (intensity > 0.02) {
+                nozzles.forEach((nz, idx) => {
+                    const fx = nz.x, fy = nz.y - 6;
+                    const flameH = 26 + intensity * 68;
+                    const flameW = 14 + intensity * 13;
+                    const sway1 = Math.sin(animTime * 0.19 + idx * 2.1) * (4 + intensity * 6);
+                    const sway2 = Math.cos(animTime * 0.26 + idx * 1.4) * (3 + intensity * 4);
+
+                    const auraGrad = ctx.createRadialGradient(fx, fy - flameH * 0.35, 4, fx, fy - flameH * 0.35, flameH * 0.85);
+                    auraGrad.addColorStop(0, `rgba(255, 110, 20, ${0.32 + intensity * 0.28})`);
+                    auraGrad.addColorStop(0.55, `rgba(239, 68, 68, ${0.14 + intensity * 0.14})`);
+                    auraGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                    ctx.fillStyle = auraGrad;
+                    ctx.beginPath();
+                    ctx.arc(fx, fy - flameH * 0.35, flameH * 0.85, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    const outerGrad = ctx.createLinearGradient(fx, fy, fx, fy - flameH);
+                    outerGrad.addColorStop(0, 'rgba(249, 115, 22, 0.85)');
+                    outerGrad.addColorStop(0.55, 'rgba(251, 191, 36, 0.72)');
+                    outerGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                    ctx.fillStyle = outerGrad;
+                    ctx.beginPath();
+                    ctx.moveTo(fx - flameW, fy);
+                    ctx.bezierCurveTo(fx - flameW * 1.15, fy - flameH * 0.42, fx - flameW * 0.35 + sway2, fy - flameH * 0.78, fx + sway1, fy - flameH);
+                    ctx.bezierCurveTo(fx + flameW * 0.35 + sway2, fy - flameH * 0.78, fx + flameW * 1.15, fy - flameH * 0.42, fx + flameW, fy);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    const innerH = flameH * 0.66;
+                    const innerW = flameW * 0.56;
+                    const innerGrad = ctx.createLinearGradient(fx, fy, fx, fy - innerH);
+                    innerGrad.addColorStop(0, 'rgba(255, 251, 200, 0.92)');
+                    innerGrad.addColorStop(0.65, 'rgba(253, 224, 71, 0.65)');
+                    innerGrad.addColorStop(1, 'rgba(253, 224, 71, 0)');
+                    ctx.fillStyle = innerGrad;
+                    ctx.beginPath();
+                    ctx.moveTo(fx - innerW, fy);
+                    ctx.quadraticCurveTo(fx - innerW * 0.85, fy - innerH * 0.55, fx + sway2 * 0.55, fy - innerH);
+                    ctx.quadraticCurveTo(fx + innerW * 0.85, fy - innerH * 0.55, fx + innerW, fy);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    if (blueRatio > 0) {
+                        const blueH = flameH * (0.34 + blueRatio * 0.24);
+                        const blueW = flameW * (0.42 + blueRatio * 0.16);
+                        const blueGrad = ctx.createLinearGradient(fx, fy, fx, fy - blueH);
+                        blueGrad.addColorStop(0, `rgba(186, 230, 253, ${0.85 * blueRatio})`);
+                        blueGrad.addColorStop(0.45, `rgba(56, 189, 248, ${0.95 * blueRatio})`);
+                        blueGrad.addColorStop(0.85, `rgba(37, 99, 235, ${0.75 * blueRatio})`);
+                        blueGrad.addColorStop(1, 'rgba(37, 99, 235, 0)');
+                        ctx.fillStyle = blueGrad;
+                        ctx.beginPath();
+                        ctx.moveTo(fx - blueW, fy);
+                        ctx.quadraticCurveTo(fx - blueW * 0.75, fy - blueH * 0.6, fx + sway2 * 0.35, fy - blueH);
+                        ctx.quadraticCurveTo(fx + blueW * 0.75, fy - blueH * 0.6, fx + blueW, fy);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                });
+            }
+
+            for (let i = flameParticles.length - 1; i >= 0; i--) {
+                const fp = flameParticles[i];
+                fp.x += fp.vx + Math.sin(animTime * 0.18 + fp.swayPhase) * 0.55;
+                fp.y += fp.vy;
+                fp.life -= fp.decay;
+                fp.radius *= 0.975;
+                if (fp.life <= 0 || fp.radius < 1.2) {
+                    flameParticles.splice(i, 1);
+                    continue;
+                }
+                const g = ctx.createRadialGradient(fp.x, fp.y, 0, fp.x, fp.y, fp.radius);
+                if (fp.isBlue) {
+                    g.addColorStop(0, `rgba(224, 242, 254, ${fp.life * 0.85})`);
+                    g.addColorStop(0.45, `rgba(56, 189, 248, ${fp.life * 0.65})`);
+                    g.addColorStop(1, 'rgba(37, 99, 235, 0)');
+                } else {
+                    g.addColorStop(0, `rgba(255, 251, 214, ${fp.life * 0.68})`);
+                    g.addColorStop(0.42, `rgba(251, 146, 60, ${fp.life * 0.52})`);
+                    g.addColorStop(1, 'rgba(220, 38, 38, 0)');
+                }
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(fp.x, fp.y, fp.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            for (let i = emberParticles.length - 1; i >= 0; i--) {
+                const ep = emberParticles[i];
+                ep.x += ep.vx + Math.sin(animTime * 0.14 + ep.phase) * 0.85;
+                ep.y += ep.vy;
+                ep.life -= ep.decay;
+                if (ep.life <= 0 || ep.y < 10) {
+                    emberParticles.splice(i, 1);
+                    continue;
+                }
+                const twinkle = 0.65 + 0.35 * Math.sin(animTime * 0.45 + ep.phase);
+                const alpha = ep.life * twinkle;
+                const eg = ctx.createRadialGradient(ep.x, ep.y, 0, ep.x, ep.y, ep.size * 2.6);
+                eg.addColorStop(0, `rgba(255, 255, 240, ${alpha})`);
+                eg.addColorStop(0.45, `rgba(251, 191, 36, ${alpha * 0.85})`);
+                eg.addColorStop(1, 'rgba(249, 115, 22, 0)');
+                ctx.fillStyle = eg;
+                ctx.beginPath();
+                ctx.arc(ep.x, ep.y, ep.size * 2.6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function drawStretchArrows() {
+            if (stretchTimer <= 0) return;
+            const yMid = canvasH * 0.44;
+            const pulse = Math.sin(animTime * 0.35) * 4;
+
+            ctx.save();
+            ctx.fillStyle = '#8b5cf6';
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2.5;
+
+            const lx = 18 - pulse;
+            ctx.beginPath();
+            ctx.moveTo(lx, yMid);
+            ctx.lineTo(lx + 16, yMid - 12);
+            ctx.lineTo(lx + 16, yMid - 5);
+            ctx.lineTo(lx + 30, yMid - 5);
+            ctx.lineTo(lx + 30, yMid + 5);
+            ctx.lineTo(lx + 16, yMid + 5);
+            ctx.lineTo(lx + 16, yMid + 12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            const rx = canvasW - 18 + pulse;
+            ctx.beginPath();
+            ctx.moveTo(rx, yMid);
+            ctx.lineTo(rx - 16, yMid - 12);
+            ctx.lineTo(rx - 16, yMid - 5);
+            ctx.lineTo(rx - 30, yMid - 5);
+            ctx.lineTo(rx - 30, yMid + 5);
+            ctx.lineTo(rx - 16, yMid + 5);
+            ctx.lineTo(rx - 16, yMid + 12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        /* Render & Simulate the user's REAL custom-built polymer inside the Lab Tank */
+        function renderCustomPolymerInLab(p, expression, isMelting, isCharred, isStrained, heatRatio, vibAmp, stretchAmount, fireIntensity) {
+            if (!customSimGraph) return;
+            const g = customSimGraph;
+            const centerX = canvasW / 2;
+            const centerY = (canvasH - 60) / 2;
+            const radius = canvasW < 420 ? 14 : 17;
+
+            // Update positions of every real node built by the user
+            g.nodes.forEach((n, idx) => {
+                const vibX = Math.sin(animTime * (0.15 + heatRatio * 0.35) + n.phase) * vibAmp;
+                const vibY = Math.cos(animTime * (0.18 + heatRatio * 0.35) + n.phase * 1.3) * vibAmp;
+
+                // Apply stretch horizontally from center
+                const relX = n.baseX - centerX;
+                const stretchedX = centerX + relX * (1 + stretchAmount);
+
+                if (isMelting) {
+                    // When thermoplastic custom polymer melts, chains/nodes slide apart & swirl smoothly
+                    const meltPower = Math.min(1, (temperature - p.meltTemp + 20) / 110);
+                    const slideDir = (n.compId % 2 === 0 ? 1 : -1);
+                    const slideX = Math.sin(animTime * 0.04 + n.compId * 1.7) * (28 + meltPower * 26) * slideDir;
+                    const expandX = (n.baseX - centerX) * (0.18 * meltPower);
+                    const expandY = (n.baseY - centerY) * (0.16 * meltPower) + Math.sin(animTime * 0.06 + idx * 0.9) * (10 * meltPower);
+                    n.x = stretchedX + slideX + expandX + vibX;
+                    n.y = n.baseY + expandY + vibY;
+                } else {
+                    n.x = stretchedX + vibX;
+                    n.y = n.baseY + vibY;
+                }
+            });
+
+            // 1) Draw Sulfur Cross-Links FIRST (Glowing golden-orange bridges)
+            g.sulfurBonds.forEach(sb => {
+                const n1 = g.nodeById[sb.a];
+                const n2 = g.nodeById[sb.b];
+                if (!n1 || !n2) return;
+                ctx.save();
+                if (temperature >= 140 && !isCharred) {
+                    ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)';
+                    ctx.lineWidth = 14;
+                    ctx.beginPath();
+                    ctx.moveTo(n1.x, n1.y);
+                    ctx.lineTo(n2.x, n2.y);
+                    ctx.stroke();
+                }
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 9;
+                ctx.lineCap = 'round';
+                ctx.setLineDash([7, 5]);
+                ctx.beginPath();
+                ctx.moveTo(n1.x, n1.y);
+                ctx.lineTo(n2.x, n2.y);
+                ctx.stroke();
+
+                ctx.strokeStyle = isCharred ? '#64748b' : '#f59e0b';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(n1.x, n1.y);
+                ctx.lineTo(n2.x, n2.y);
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            // 2) Draw Main Covalent Bonds built by the user
+            g.mainBonds.forEach(mb => {
+                const n1 = g.nodeById[mb.a];
+                const n2 = g.nodeById[mb.b];
+                if (!n1 || !n2) return;
+                ctx.save();
+                // If melting, stretch/thin covalent bonds slightly to show softening
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = isMelting ? 6.5 : 8.5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(n1.x, n1.y);
+                ctx.lineTo(n2.x, n2.y);
+                ctx.stroke();
+
+                ctx.strokeStyle = isCharred ? '#475569' : p.bondColor;
+                ctx.lineWidth = isMelting ? 3.2 : 4.5;
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            // 3) Draw Cute Cartoon Monomer Characters at exact custom positions
+            g.nodes.forEach(n => {
+                drawCartoonMonomer(n.x, n.y, radius, n.color || p.baseColor, expression, isCharred, fireIntensity);
+            });
+
+            // Return nodes array so smoke particles can spawn on them if charred
+            return g.nodes;
+        }
+
+        /* Main Animation Loop */
+        function animateSimulation() {
+            animTime += 1;
+
+            if (currentTab === 'lab' && ctx) {
+                ctx.clearRect(0, 0, canvasW, canvasH);
+
+                // Subtle lab grid background inside tank
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.18)';
+                ctx.lineWidth = 1;
+                for (let gx = 0; gx < canvasW; gx += 32) {
+                    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, canvasH); ctx.stroke();
+                }
+                for (let gy = 0; gy < canvasH; gy += 32) {
+                    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(canvasW, gy); ctx.stroke();
+                }
+
+                const p = getActivePolymerData();
+                const bType = p.behaviorType;
+                const fireIntensity = Math.max(0, Math.min(1, (temperature - 30) / 250));
+                const blueCoreRatio = Math.max(0, Math.min(1, (temperature - 180) / 85));
+                const nozzles = getBurnerNozzles();
+
+                drawAmbientFireGlow(fireIntensity, blueCoreRatio);
+                drawHeatShimmer(nozzles, fireIntensity);
+
+                const isMelting = (bType === 'linear' && temperature >= 140) ||
+                                  (bType === 'branched' && temperature >= 105);
+                const isCharred = (bType === 'crosslinked' && temperature >= 265);
+                const isStrained = (bType === 'crosslinked' && temperature >= 140 && temperature < 265);
+
+                const heatRatio = (temperature - 25) / 275;
+                const vibAmp = 0.8 + heatRatio * (bType === 'crosslinked' ? 4.2 : 5.5);
+
+                let stretchAmount = 0;
+                if (stretchTimer > 0) {
+                    stretchTimer -= 1;
+                    stretchPhase += 0.085;
+                    const env = Math.sin((stretchTimer / 110) * Math.PI);
+                    if (bType === 'linear') {
+                        stretchAmount = env * 0.14;
+                    } else if (bType === 'branched') {
+                        stretchAmount = env * 0.34;
+                    } else {
+                        stretchAmount = Math.sin(animTime * 0.9) * 0.015 * env;
+                    }
+                    if (stretchTimer === 0) {
+                        updateLiveObservation();
+                    }
+                }
+
+                let expression = 'happy';
+                if (stretchTimer > 0) {
+                    expression = bType === 'crosslinked' ? 'strained' : 'stretched';
+                } else if (isCharred) {
+                    expression = 'charred';
+                } else if (isMelting) {
+                    expression = 'melted';
+                } else if (isStrained) {
+                    expression = 'strained';
+                } else if (temperature >= 75) {
+                    expression = 'sweat';
+                }
+
+                let activeNodesForSmoke = [];
+
+                if (currentPolymerId === 'custom' && customPolymer && customSimGraph) {
+                    // Render user's REAL custom-built polymer!
+                    activeNodesForSmoke = renderCustomPolymerInLab(
+                        p, expression, isMelting, isCharred, isStrained, heatRatio, vibAmp, stretchAmount, fireIntensity
+                    ) || [];
+                } else if (chains.length > 0) {
+                    // Render standard preset chains
+                    const centerX = canvasW / 2;
+                    const radius = canvasW < 420 ? 13 : 16;
+
+                    chains.forEach((chain, r) => {
+                        if (isMelting) {
+                            const meltIntensity = Math.min(1, (temperature - p.meltTemp + 20) / 100);
+                            chain.slideOffset += chain.slideSpeed * (0.8 + meltIntensity * 1.6);
+                            if (chain.slideOffset > 55 || chain.slideOffset < -55) chain.slideSpeed *= -1;
+                            chain.driftY = Math.sin(animTime * 0.05 + r * 2) * (10 + meltIntensity * 10);
+                        } else {
+                            chain.slideOffset *= 0.9;
+                            chain.driftY *= 0.9;
+                        }
+
+                        chain.nodes.forEach((node, c) => {
+                            const vibX = Math.sin(animTime * (0.15 + heatRatio * 0.35) + node.phase) * vibAmp;
+                            const vibY = Math.cos(animTime * (0.18 + heatRatio * 0.35) + node.phase * 1.3) * vibAmp;
+                            const relX = node.baseX - centerX;
+                            const stretchedX = centerX + relX * (1 + stretchAmount);
+
+                            node.x = stretchedX + chain.slideOffset + vibX;
+                            node.y = node.baseY + chain.driftY + vibY + (isMelting ? Math.sin(animTime * 0.08 + c) * 6 : 0);
+                            activeNodesForSmoke.push(node);
+                        });
+
+                        if (chain.branches) {
+                            chain.branches.forEach(br => {
+                                const parent = chain.nodes[br.parentIdx];
+                                const sway = Math.sin(animTime * 0.1 + br.phase) * (2.5 + heatRatio * 4);
+                                br.x = parent.x + br.offsetX + sway;
+                                br.y = parent.y + br.offsetY + Math.cos(animTime * 0.1 + br.phase) * 2;
+                            });
+                        }
+                    });
+
+                    // Cross-links
+                    if (bType === 'crosslinked') {
+                        const bridgeCols = [1, 3, 5].filter(i => i < chains[0].nodes.length);
+                        for (let r = 0; r < chains.length - 1; r++) {
+                            bridgeCols.forEach(col => {
+                                const n1 = chains[r].nodes[col];
+                                const n2 = chains[r + 1].nodes[col];
+                                ctx.save();
+                                if (temperature >= 140 && !isCharred) {
+                                    ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)';
+                                    ctx.lineWidth = 13;
+                                    ctx.beginPath();
+                                    ctx.moveTo(n1.x, n1.y);
+                                    ctx.lineTo(n2.x, n2.y);
+                                    ctx.stroke();
+                                }
+                                ctx.strokeStyle = '#1e293b';
+                                ctx.lineWidth = 9;
+                                ctx.lineCap = 'round';
+                                ctx.beginPath();
+                                ctx.moveTo(n1.x, n1.y);
+                                ctx.lineTo(n2.x, n2.y);
+                                ctx.stroke();
+
+                                ctx.strokeStyle = isCharred ? '#64748b' : '#fbbf24';
+                                ctx.lineWidth = 5;
+                                ctx.beginPath();
+                                ctx.moveTo(n1.x, n1.y);
+                                ctx.lineTo(n2.x, n2.y);
+                                ctx.stroke();
+                                ctx.restore();
+                            });
+                        }
+                    }
+
+                    // Main & branch bonds
+                    chains.forEach(chain => {
+                        ctx.save();
+                        ctx.strokeStyle = '#1e293b';
+                        ctx.lineWidth = 8.5;
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.beginPath();
+                        chain.nodes.forEach((n, idx) => {
+                            if (idx === 0) ctx.moveTo(n.x, n.y);
+                            else ctx.lineTo(n.x, n.y);
+                        });
+                        ctx.stroke();
+                        ctx.strokeStyle = isCharred ? '#475569' : p.bondColor;
+                        ctx.lineWidth = 4.5;
+                        ctx.stroke();
+                        ctx.restore();
+
+                        if (chain.branches) {
+                            chain.branches.forEach(br => {
+                                const parent = chain.nodes[br.parentIdx];
+                                ctx.save();
+                                ctx.strokeStyle = '#1e293b';
+                                ctx.lineWidth = 7.5;
+                                ctx.lineCap = 'round';
+                                ctx.beginPath();
+                                ctx.moveTo(parent.x, parent.y);
+                                ctx.lineTo(br.x, br.y);
+                                ctx.stroke();
+                                ctx.strokeStyle = p.bondColor;
+                                ctx.lineWidth = 3.8;
+                                ctx.stroke();
+                                ctx.restore();
+                            });
+                        }
+                    });
+
+                    // Monomers
+                    chains.forEach(chain => {
+                        chain.nodes.forEach(n => {
+                            drawCartoonMonomer(n.x, n.y, radius, p.baseColor, expression, isCharred, fireIntensity);
+                        });
+                        if (chain.branches) {
+                            chain.branches.forEach(br => {
+                                drawCartoonMonomer(br.x, br.y, radius * 0.82, p.branchColor, expression, isCharred, fireIntensity);
+                            });
+                        }
+                    });
+                }
+
+                // Draw Bunsen Burners & Additive Glowing Flames in Foreground Bottom
+                drawBunsenBurnerHardware(nozzles, fireIntensity, blueCoreRatio);
+                updateAndDrawGlowingFlames(nozzles, fireIntensity, blueCoreRatio);
+
+                // Smoke puffs if Cross-linked is Charred
+                if (isCharred && activeNodesForSmoke.length > 0 && animTime % 6 === 0) {
+                    const randNode = activeNodesForSmoke[Math.floor(Math.random() * activeNodesForSmoke.length)];
+                    smokeParticles.push({
+                        x: randNode.x + (Math.random() - 0.5) * 14,
+                        y: randNode.y - 10,
+                        r: 8 + Math.random() * 8,
+                        alpha: 0.78,
+                        vy: -1.1 - Math.random() * 0.8
+                    });
+                }
+                for (let i = smokeParticles.length - 1; i >= 0; i--) {
+                    const sp = smokeParticles[i];
+                    sp.y += sp.vy;
+                    sp.x += Math.sin(animTime * 0.1 + i) * 0.5;
+                    sp.r += 0.18;
+                    sp.alpha -= 0.012;
+                    if (sp.alpha <= 0) {
+                        smokeParticles.splice(i, 1);
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(71, 85, 105, ${sp.alpha})`;
+                        ctx.fill();
+                    }
+                }
+
+                drawStretchArrows();
+            }
+
+            requestAnimationFrame(animateSimulation);
+        }
+
+        /* =========================================================
+           7. POLYMER BUILDER (ต่อโมเลกุลเอง -> ส่งไปทดสอบจริงใน Lab!)
+           ========================================================= */
+        let bCanvas, bCtx;
+        let bW = 600, bH = 420;
+        let bTool = 'add'; // 'add' | 'bond' | 'sulfur' | 'delete'
+        let bNodes = [];
+        let bMainBonds = [];
+        let bSulfurBonds = [];
+        let bNextId = 1;
+        let bDraggingNode = null;
+        let bBondStartNode = null;
+        let bPointerPos = null;
+        let bDetectedType = null; // 'linear' | 'branched' | 'crosslinked' | null
+
+        const BUILDER_COLORS = ['#38bdf8', '#34d399', '#a78bfa', '#fb7185', '#fbbf24'];
+
+        function resizeBuilderCanvas() {
+            const container = document.getElementById('builderContainer');
+            if (!container || !bCanvas) return;
+            const rect = container.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            bW = rect.width;
+            bH = rect.height;
+            bCanvas.width = Math.floor(bW * dpr);
+            bCanvas.height = Math.floor(bH * dpr);
+            bCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawBuilder();
+        }
+
+        function setBuilderTool(tool) {
+            playSound('pop');
+            bTool = tool;
+            bBondStartNode = null;
+            bDraggingNode = null;
+
+            const colors = {
+                add: 'bg-sky-200',
+                bond: 'bg-emerald-200',
+                sulfur: 'bg-amber-200',
+                delete: 'bg-rose-200'
+            };
+            ['add', 'bond', 'sulfur', 'delete'].forEach(t => {
+                const btn = document.getElementById(`bTool-${t}`);
+                btn.classList.remove('bg-sky-200', 'bg-emerald-200', 'bg-amber-200', 'bg-rose-200', 'bg-white');
+                btn.classList.add(t === tool ? colors[t] : 'bg-white');
+            });
+
+            const hints = {
+                add: 'แตะที่ว่างเพื่อวางมอนอเมอร์ใหม่ หรือแตะค้างแล้วลากเพื่อย้ายตำแหน่ง',
+                bond: 'แตะหรือลากจากมอนอเมอร์ตัวหนึ่งไปยังอีกตัวหนึ่ง เพื่อเชื่อมสายโซ่/ต่อกิ่ง',
+                sulfur: 'แตะหรือลากเชื่อมระหว่าง 2 สายโซ่ เพื่อสร้าง "สะพานกำมะถัน (Cross-link)"',
+                delete: 'แตะที่มอนอเมอร์หรือเส้นพันธะที่ต้องการลบออก'
+            };
+            document.getElementById('builderHintText').textContent = hints[tool];
+            drawBuilder();
+        }
+
+        function loadBuilderStarterPreset() {
+            playSound('pop');
+            bNodes = [];
+            bMainBonds = [];
+            bSulfurBonds = [];
+            bNextId = 1;
+            bBondStartNode = null;
+
+            const w = bW || 560;
+            const h = bH || 380;
+            const startX = Math.max(60, w * 0.16);
+            const endX = Math.min(w - 60, w * 0.84);
+            const count = 5;
+            const stepX = (endX - startX) / (count - 1);
+            const row1Y = h * 0.34;
+            const row2Y = h * 0.66;
+
+            // Create 2 neat parallel chains of 5 monomers each so user can add branches or sulfur bridges easily!
+            for (let r = 0; r < 2; r++) {
+                const y = r === 0 ? row1Y : row2Y;
+                let prevId = null;
+                for (let i = 0; i < count; i++) {
+                    const id = bNextId++;
+                    bNodes.push({
+                        id,
+                        x: startX + i * stepX,
+                        y,
+                        color: BUILDER_COLORS[(r * 2 + i) % BUILDER_COLORS.length]
+                    });
+                    if (prevId !== null) {
+                        bMainBonds.push({ a: prevId, b: id });
+                    }
+                    prevId = id;
+                }
+            }
+
+            analyzeBuiltPolymer();
+            drawBuilder();
+        }
+
+        function clearBuilder() {
+            playSound('pop');
+            bNodes = [];
+            bMainBonds = [];
+            bSulfurBonds = [];
+            bNextId = 1;
+            bDraggingNode = null;
+            bBondStartNode = null;
+            analyzeBuiltPolymer();
+            drawBuilder();
+        }
+
+        function getBuilderPointerPos(e) {
+            const rect = bCanvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: Math.max(24, Math.min(bW - 24, clientX - rect.left)),
+                y: Math.max(24, Math.min(bH - 24, clientY - rect.top))
+            };
+        }
+
+        function findNodeAt(pos, hitRadius = 26) {
+            for (let i = bNodes.length - 1; i >= 0; i--) {
+                const n = bNodes[i];
+                if (Math.hypot(n.x - pos.x, n.y - pos.y) <= hitRadius) return n;
+            }
+            return null;
+        }
+
+        function distToSegment(p, v, w) {
+            const l2 = (v.x - w.x) ** 2 + (v.y - w.y) ** 2;
+            if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+            let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+        }
+
+        function addBondBetween(n1, n2, isSulfur) {
+            if (!n1 || !n2 || n1.id === n2.id) return;
+            const existsMain = bMainBonds.some(b => (b.a === n1.id && b.b === n2.id) || (b.a === n2.id && b.b === n1.id));
+            const existsSulfur = bSulfurBonds.some(b => (b.a === n1.id && b.b === n2.id) || (b.a === n2.id && b.b === n1.id));
+            if (existsMain || existsSulfur) return;
+
+            if (isSulfur) {
+                bSulfurBonds.push({ a: n1.id, b: n2.id });
+            } else {
+                bMainBonds.push({ a: n1.id, b: n2.id });
+            }
+            playSound('pop');
+            analyzeBuiltPolymer();
+        }
+
+        function handleBuilderDown(e) {
+            e.preventDefault();
+            const pos = getBuilderPointerPos(e);
+            bPointerPos = pos;
+            const hitNode = findNodeAt(pos);
+
+            if (bTool === 'add') {
+                if (hitNode) {
+                    bDraggingNode = hitNode;
+                } else {
+                    const newNode = {
+                        id: bNextId++,
+                        x: pos.x,
+                        y: pos.y,
+                        color: BUILDER_COLORS[(bNextId - 2) % BUILDER_COLORS.length]
+                    };
+                    // Auto-connect if placed close to an existing monomer
+                    const nearNode = findNodeAt(pos, 58);
+                    bNodes.push(newNode);
+                    if (nearNode) {
+                        bMainBonds.push({ a: nearNode.id, b: newNode.id });
+                    }
+                    playSound('pop');
+                    bDraggingNode = newNode;
+                    analyzeBuiltPolymer();
+                }
+            } else if (bTool === 'bond' || bTool === 'sulfur') {
+                if (hitNode) {
+                    if (bBondStartNode && bBondStartNode.id !== hitNode.id) {
+                        addBondBetween(bBondStartNode, hitNode, bTool === 'sulfur');
+                        bBondStartNode = null;
+                    } else {
+                        bBondStartNode = hitNode;
+                        playSound('pop');
+                    }
+                } else {
+                    bBondStartNode = null;
+                }
+            } else if (bTool === 'delete') {
+                if (hitNode) {
+                    bNodes = bNodes.filter(n => n.id !== hitNode.id);
+                    bMainBonds = bMainBonds.filter(b => b.a !== hitNode.id && b.b !== hitNode.id);
+                    bSulfurBonds = bSulfurBonds.filter(b => b.a !== hitNode.id && b.b !== hitNode.id);
+                    playSound('pop');
+                    analyzeBuiltPolymer();
+                } else {
+                    const nodeMap = Object.fromEntries(bNodes.map(n => [n.id, n]));
+                    bMainBonds = bMainBonds.filter(b => {
+                        const n1 = nodeMap[b.a], n2 = nodeMap[b.b];
+                        return !(n1 && n2 && distToSegment(pos, n1, n2) < 12);
+                    });
+                    bSulfurBonds = bSulfurBonds.filter(b => {
+                        const n1 = nodeMap[b.a], n2 = nodeMap[b.b];
+                        return !(n1 && n2 && distToSegment(pos, n1, n2) < 12);
+                    });
+                    playSound('pop');
+                    analyzeBuiltPolymer();
+                }
+            }
+            drawBuilder();
+        }
+
+        function handleBuilderMove(e) {
+            if (!bDraggingNode && !bBondStartNode) return;
+            e.preventDefault();
+            const pos = getBuilderPointerPos(e);
+            bPointerPos = pos;
+
+            if (bDraggingNode) {
+                bDraggingNode.x = pos.x;
+                bDraggingNode.y = pos.y;
+            }
+            drawBuilder();
+        }
+
+        function handleBuilderUp(e) {
+            if (bBondStartNode && bPointerPos) {
+                const targetNode = findNodeAt(bPointerPos, 28);
+                if (targetNode && targetNode.id !== bBondStartNode.id) {
+                    addBondBetween(bBondStartNode, targetNode, bTool === 'sulfur');
+                    bBondStartNode = null;
+                }
+            }
+            bDraggingNode = null;
+            drawBuilder();
+        }
+
+        function analyzeBuiltPolymer() {
+            const totalBonds = bMainBonds.length + bSulfurBonds.length;
+            document.getElementById('builderCountsLabel').textContent =
+                `${bNodes.length} มอนอเมอร์ | ${totalBonds} พันธะ`;
+
+            const nameEl = document.getElementById('builderDetectedName');
+            const descEl = document.getElementById('builderDetectedDesc');
+            const cardEl = document.getElementById('builderResultCard');
+            const testBtn = document.getElementById('testBuiltPolymerBtn');
+
+            cardEl.className = 'p-4 rounded-2xl border-2 border-slate-800 space-y-2 transition-colors ';
+
+            if (bNodes.length < 3 || totalBonds < 2) {
+                bDetectedType = null;
+                testBtn.disabled = true;
+                testBtn.classList.remove('animate-ready-pulse');
+                cardEl.classList.add('bg-slate-50');
+                nameEl.textContent = 'ยังต่อไม่ครบสายโซ่';
+                descEl.textContent = 'วางมอนอเมอร์อย่างน้อย 3 ตัว และเชื่อมพันธะอย่างน้อย 2 เส้น เพื่อวิเคราะห์โครงสร้างและส่งเข้าห้องทดลอง!';
+                return;
+            }
+
+            testBtn.disabled = false;
+            testBtn.classList.add('animate-ready-pulse');
+
+            // Compute degree of each node on main bonds
+            const deg = {};
+            bNodes.forEach(n => { deg[n.id] = 0; });
+            bMainBonds.forEach(b => {
+                if (deg[b.a] !== undefined) deg[b.a]++;
+                if (deg[b.b] !== undefined) deg[b.b]++;
+            });
+            const maxDeg = Math.max(0, ...Object.values(deg));
+
+            if (bSulfurBonds.length > 0) {
+                bDetectedType = 'crosslinked';
+                cardEl.classList.add('bg-purple-100');
+                nameEl.textContent = '🕸️ พอลิเมอร์แบบร่างแห (Cross-linked)';
+                descEl.textContent = `พบสะพานกำมะถันเชื่อมขวาง ${bSulfurBonds.length} จุด! โครงข่าย 3 มิตินี้แข็งแรง คงรูปดีมาก ทนความร้อนสูง และไม่หลอมเหลว (เทอร์มอเซต)`;
+            } else if (maxDeg >= 3) {
+                bDetectedType = 'branched';
+                cardEl.classList.add('bg-emerald-100');
+                nameEl.textContent = '🌿 พอลิเมอร์แบบกิ่ง (Branched)';
+                descEl.textContent = 'มีมอนอเมอร์ที่แตกแขนง 3 ทิศทางขึ้นไป! กิ่งเหล่านี้ช่วยกั้นไม่ให้สายโซ่ชิดกัน จึงอ่อนนุ่ม ยืดหยุ่นสูง และหลอมเหลวได้ง่าย';
+            } else {
+                bDetectedType = 'linear';
+                cardEl.classList.add('bg-sky-100');
+                nameEl.textContent = '📏 พอลิเมอร์แบบเส้น (Linear)';
+                descEl.textContent = 'มอนอเมอร์เชื่อมต่อกันเป็นสายโซ่ต่อเนื่องไม่มีกิ่งก้าน! ทำให้จัดเรียงชิดกันได้ดี แข็ง เหนียว และหลอมเหลวรีไซเคิลได้';
+            }
+        }
+
+        function drawBuilder() {
+            if (!bCtx) return;
+            bCtx.clearRect(0, 0, bW, bH);
+
+            const nodeMap = Object.fromEntries(bNodes.map(n => [n.id, n]));
+
+            // Draw Sulfur Bridges (Amber dashed glowing lines)
+            bSulfurBonds.forEach(b => {
+                const n1 = nodeMap[b.a], n2 = nodeMap[b.b];
+                if (!n1 || !n2) return;
+                bCtx.save();
+                bCtx.strokeStyle = '#1e293b';
+                bCtx.lineWidth = 9;
+                bCtx.setLineDash([7, 5]);
+                bCtx.lineCap = 'round';
+                bCtx.beginPath(); bCtx.moveTo(n1.x, n1.y); bCtx.lineTo(n2.x, n2.y); bCtx.stroke();
+
+                bCtx.strokeStyle = '#f59e0b';
+                bCtx.lineWidth = 5;
+                bCtx.beginPath(); bCtx.moveTo(n1.x, n1.y); bCtx.lineTo(n2.x, n2.y); bCtx.stroke();
+                bCtx.restore();
+            });
+
+            // Draw Main Covalent Bonds
+            bMainBonds.forEach(b => {
+                const n1 = nodeMap[b.a], n2 = nodeMap[b.b];
+                if (!n1 || !n2) return;
+                bCtx.save();
+                bCtx.strokeStyle = '#1e293b';
+                bCtx.lineWidth = 8.5;
+                bCtx.lineCap = 'round';
+                bCtx.beginPath(); bCtx.moveTo(n1.x, n1.y); bCtx.lineTo(n2.x, n2.y); bCtx.stroke();
+
+                bCtx.strokeStyle = '#334155';
+                bCtx.lineWidth = 4.5;
+                bCtx.stroke();
+                bCtx.restore();
+            });
+
+            // Draw active bond preview line & target snap ring while connecting
+            if (bBondStartNode && bPointerPos) {
+                const snapTarget = findNodeAt(bPointerPos, 28);
+                const endX = (snapTarget && snapTarget.id !== bBondStartNode.id) ? snapTarget.x : bPointerPos.x;
+                const endY = (snapTarget && snapTarget.id !== bBondStartNode.id) ? snapTarget.y : bPointerPos.y;
+
+                bCtx.save();
+                bCtx.strokeStyle = bTool === 'sulfur' ? '#f59e0b' : '#10b981';
+                bCtx.lineWidth = 4.5;
+                bCtx.setLineDash([6, 6]);
+                bCtx.beginPath();
+                bCtx.moveTo(bBondStartNode.x, bBondStartNode.y);
+                bCtx.lineTo(endX, endY);
+                bCtx.stroke();
+
+                if (snapTarget && snapTarget.id !== bBondStartNode.id) {
+                    bCtx.setLineDash([]);
+                    bCtx.strokeStyle = bTool === 'sulfur' ? '#f59e0b' : '#10b981';
+                    bCtx.lineWidth = 3.5;
+                    bCtx.beginPath();
+                    bCtx.arc(snapTarget.x, snapTarget.y, 24, 0, Math.PI * 2);
+                    bCtx.stroke();
+                }
+                bCtx.restore();
+            }
+
+            // Draw Monomer Characters on Builder Canvas
+            bNodes.forEach(n => {
+                const isSelected = (bBondStartNode && bBondStartNode.id === n.id) || (bDraggingNode && bDraggingNode.id === n.id);
+                if (isSelected) {
+                    bCtx.save();
+                    bCtx.strokeStyle = '#f59e0b';
+                    bCtx.lineWidth = 3.5;
+                    bCtx.beginPath();
+                    bCtx.arc(n.x, n.y, 23, 0, Math.PI * 2);
+                    bCtx.stroke();
+                    bCtx.restore();
+                }
+
+                bCtx.save();
+                bCtx.translate(n.x, n.y);
+                bCtx.beginPath();
+                bCtx.arc(0, 0, 17, 0, Math.PI * 2);
+                bCtx.fillStyle = n.color;
+                bCtx.fill();
+                bCtx.lineWidth = 2.5;
+                bCtx.strokeStyle = '#1e293b';
+                bCtx.stroke();
+
+                // Gloss highlight
+                bCtx.beginPath();
+                bCtx.ellipse(-5, -5.5, 4.2, 2.4, -Math.PI / 4, 0, Math.PI * 2);
+                bCtx.fillStyle = 'rgba(255,255,255,0.68)';
+                bCtx.fill();
+
+                // Cute eyes + smile
+                bCtx.fillStyle = '#1e293b';
+                bCtx.beginPath();
+                bCtx.arc(-5, -1, 2.2, 0, Math.PI * 2);
+                bCtx.arc(5, -1, 2.2, 0, Math.PI * 2);
+                bCtx.fill();
+                bCtx.beginPath();
+                bCtx.arc(0, 3, 4.2, 0.15 * Math.PI, 0.85 * Math.PI);
+                bCtx.strokeStyle = '#1e293b';
+                bCtx.lineWidth = 1.8;
+                bCtx.stroke();
+                bCtx.restore();
+            });
+
+            // Empty canvas prompt
+            if (bNodes.length === 0) {
+                bCtx.save();
+                bCtx.fillStyle = '#64748b';
+                bCtx.font = '600 15px Kanit, sans-serif';
+                bCtx.textAlign = 'center';
+                bCtx.fillText('👆 แตะพื้นที่ว่างเพื่อวางมอนอเมอร์ หรือกด "✨ วางโซ่ตัวอย่าง" ด้านบน', bW / 2, bH / 2);
+                bCtx.restore();
+            }
+        }
+
+        /* Package the user's REAL custom structure and send it into the Lab! */
+        function sendBuiltPolymerToLab() {
+            if (!bDetectedType || bNodes.length < 3) return;
+            playSound('correct');
+
+            const template = POLYMERS[bDetectedType];
+            const typeLabelMap = {
+                linear: 'แบบเส้น',
+                branched: 'แบบกิ่ง',
+                crosslinked: 'แบบร่างแห'
+            };
+            const typeLabel = typeLabelMap[bDetectedType];
+
+            // Compute realistic properties scaled slightly by user's actual bond/node structure
+            const nodeCount = bNodes.length;
+            const bondCount = bMainBonds.length;
+            const sulfurCount = bSulfurBonds.length;
+
+            let density = template.density;
+            let flexibility = template.flexibility;
+            if (bDetectedType === 'crosslinked') {
+                density = Math.min(98, 84 + sulfurCount * 4);
+                flexibility = Math.max(8, 25 - sulfurCount * 4);
+            } else if (bDetectedType === 'branched') {
+                flexibility = Math.min(96, 82 + Math.min(14, nodeCount * 2));
+            }
+
+            customPolymer = {
+                id: 'custom',
+                behaviorType: bDetectedType,
+                nameTh: `โมเลกุลของคุณเอง (${typeLabel})`,
+                shortName: `ของคุณ (${typeLabel})`,
+                plasticType: template.plasticType,
+                plasticBadgeClass: template.plasticBadgeClass,
+                recyclable: template.recyclable,
+                density,
+                densityLabel: `${density >= 75 ? 'สูง' : 'ต่ำ'} (${density}%)`,
+                flexibility,
+                flexLabel: `${flexibility >= 70 ? 'สูงมาก' : flexibility >= 40 ? 'ปานกลาง' : 'ต่ำ / แข็งเปราะ'} (${flexibility}%)`,
+                meltScore: template.meltScore,
+                meltLabel: template.meltLabel,
+                meltTemp: template.meltTemp,
+                baseColor: '#fbbf24',
+                bondColor: template.bondColor,
+                crossColor: '#f59e0b',
+                examples: template.examples,
+                // Store exact user geometry!
+                nodes: bNodes.map(n => ({ ...n })),
+                mainBonds: bMainBonds.map(b => ({ ...b })),
+                sulfurBonds: bSulfurBonds.map(b => ({ ...b }))
+            };
+
+            // Reveal & update the 4th button in the Lab selector
+            const customBtn = document.getElementById('polyBtn-custom');
+            const grid = document.getElementById('labSelectorGrid');
+            customBtn.classList.remove('hidden');
+            grid.classList.remove('sm:grid-cols-3');
+            grid.classList.add('sm:grid-cols-2', 'lg:grid-cols-4');
+            document.getElementById('customBtnSubtitle').textContent =
+                `${typeLabel} (${nodeCount} ตัว, ${bondCount + sulfurCount} พันธะ)`;
+
+            // Switch to Lab tab, select 'custom', and start at room temp (25°C) so user can heat it up!
+            temperature = 25;
+            document.getElementById('tempSlider').value = 25;
+            switchTab('lab');
+            selectPolymer('custom');
+        }
+
+        /* =========================================================
+           8. RECYCLE SORTER GAME (ภารกิจแยกขยะพอลิเมอร์ 12 ชิ้น)
+           ========================================================= */
+        const RECYCLE_ITEMS = [
+            { id: 'r1', emoji: '🧴', name: 'ขวดนม HDPE', bin: 'thermoplastic', reason: 'ขวดนม HDPE เป็นแบบเส้น (เทอร์มอพลาสติก) หลอมรีไซเคิลได้!' },
+            { id: 'r2', emoji: '🍽️', name: 'จานเมลามีน', bin: 'thermoset', reason: 'จานเมลามีนเป็นแบบร่างแห (เทอร์มอเซต) ทนร้อน หลอมใหม่ไม่ได้!' },
+            { id: 'r3', emoji: '🛍️', name: 'ถุงเย็น LDPE', bin: 'thermoplastic', reason: 'ถุงเย็น LDPE เป็นแบบกิ่ง (เทอร์มอพลาสติก) หลอมขึ้นรูปใหม่ได้!' },
+            { id: 'r4', emoji: '🍳', name: 'ด้ามกระทะเบกาไลต์', bin: 'thermoset', reason: 'ด้ามกระทะเบกาไลต์เป็นแบบร่างแห (เทอร์มอเซต) ไม่หลอมเหลวเมื่อโดนไฟ!' },
+            { id: 'r5', emoji: '🚰', name: 'ท่อน้ำ PVC', bin: 'thermoplastic', reason: 'ท่อ PVC เป็นแบบเส้น (เทอร์มอพลาสติก) สามารถนำกลับมาหลอมรีไซเคิลได้!' },
+            { id: 'r6', emoji: '🔌', name: 'ปลั๊กไฟ / สวิตช์ไฟ', bin: 'thermoset', reason: 'ปลั๊กไฟทำจากเทอร์มอเซตแบบร่างแห ทนความร้อนและไม่ละลาย!' },
+            { id: 'r7', emoji: '🌯', name: 'ฟิล์มห่ออาหาร', bin: 'thermoplastic', reason: 'ฟิล์มห่ออาหารเป็นพอลิเมอร์แบบกิ่ง (เทอร์มอพลาสติก) หลอมใหม่ได้!' },
+            { id: 'r8', emoji: '🧪', name: 'กาวอีพ็อกซีแข็งตัว', bin: 'thermoset', reason: 'อีพ็อกซีเรซินเกิดโครงข่าย 3 มิติแบบร่างแห (เทอร์มอเซต) หลอมซ้ำไม่ได้!' },
+            { id: 'r9', emoji: '🥡', name: 'กล่องอาหาร PP', bin: 'thermoplastic', reason: 'กล่องพอลิโพรพิลีน (PP) เป็นเทอร์มอพลาสติก รีไซเคิลได้!' },
+            { id: 'r10', emoji: '🛞', name: 'ยางรถยนต์วัลคาไนซ์', bin: 'thermoset', reason: 'ยางรถยนต์มีสะพานกำมะถันเชื่อมขวางแบบร่างแห จึงหลอมเหลวซ้ำไม่ได้!' },
+            { id: 'r11', emoji: '🍯', name: 'ขวดบีบซอส', bin: 'thermoplastic', reason: 'ขวดบีบซอสทำจาก LDPE แบบกิ่ง ยืดหยุ่นและหลอมรีไซเคิลได้!' },
+            { id: 'r12', emoji: '🪵', name: 'แผ่นลามิเนตเมลามีน', bin: 'thermoset', reason: 'แผ่นลามิเนตปิดผิวเฟอร์นิเจอร์ทำจากเรซินแบบร่างแห (เทอร์มอเซต)!' }
+        ];
+
+        let sortedItemIds = new Set();
+        let selectedRecycleItemId = null;
+
+        function renderRecycleItems() {
+            const grid = document.getElementById('recycleItemsGrid');
+            document.getElementById('recycleScore').textContent = sortedItemIds.size;
+
+            const remaining = RECYCLE_ITEMS.filter(item => !sortedItemIds.has(item.id));
+            if (remaining.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-6 space-y-2 animate-pop">
+                        <div class="text-5xl">🏆</div>
+                        <div class="text-lg font-bold text-emerald-800">สุดยอด! คุณคัดแยกขยะพอลิเมอร์ครบทั้ง 12 ชิ้นแล้ว!</div>
+                        <button onclick="resetRecycleGame()" class="cartoon-btn bg-amber-300 hover:bg-amber-400 px-5 py-2 text-sm font-bold">🔄 เล่นอีกรอบ</button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = remaining.map(item => {
+                const isSelected = selectedRecycleItemId === item.id;
+                return `
+                    <div draggable="true"
+                         ondragstart="handleItemDragStart(event, '${item.id}')"
+                         onclick="selectRecycleItem('${item.id}')"
+                         class="cartoon-btn ${isSelected ? 'bg-amber-200 ring-4 ring-amber-400' : 'bg-white hover:bg-sky-50'} p-2.5 text-center cursor-grab active:cursor-grabbing">
+                        <div class="text-3xl mb-1">${item.emoji}</div>
+                        <div class="text-xs font-bold text-slate-900 leading-tight">${item.name}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectRecycleItem(id) {
+            playSound('pop');
+            selectedRecycleItemId = (selectedRecycleItemId === id) ? null : id;
+            renderRecycleItems();
+        }
+
+        function handleItemDragStart(e, id) {
+            selectedRecycleItemId = id;
+            if (e.dataTransfer) e.dataTransfer.setData('text/plain', id);
+        }
+
+        function handleBinDrop(e, binType) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('bin-drop-active');
+            const id = (e.dataTransfer && e.dataTransfer.getData('text/plain')) || selectedRecycleItemId;
+            if (id) evaluateRecycleSort(id, binType);
+        }
+
+        function handleBinClick(binType) {
+            if (!selectedRecycleItemId) {
+                showRecycleFeedback(false, 'แตะเลือกสิ่งของด้านบนก่อน 1 ชิ้น แล้วค่อยแตะถังใบนี้ครับ!');
+                return;
+            }
+            evaluateRecycleSort(selectedRecycleItemId, binType);
+        }
+
+        function evaluateRecycleSort(itemId, chosenBin) {
+            const item = RECYCLE_ITEMS.find(x => x.id === itemId);
+            if (!item) return;
+
+            if (item.bin === chosenBin) {
+                playSound('correct');
+                sortedItemIds.add(item.id);
+                selectedRecycleItemId = null;
+                showRecycleFeedback(true, `ถูกต้อง! ${item.reason}`);
+                renderRecycleItems();
+            } else {
+                playSound('wrong');
+                showRecycleFeedback(false, `ยังไม่ใช่ถังนี้นะ! ลองคิดดูว่า "${item.name}" โดนความร้อนแล้วละลายหรือไหม้?`);
+            }
+        }
+
+        function showRecycleFeedback(isSuccess, msg) {
+            const box = document.getElementById('recycleFeedback');
+            const icon = document.getElementById('recycleFbIcon');
+            const text = document.getElementById('recycleFbText');
+            box.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-950', 'bg-rose-100', 'text-rose-950');
+            if (isSuccess) {
+                box.classList.add('bg-emerald-100', 'text-emerald-950');
+                icon.textContent = '🎉';
+            } else {
+                box.classList.add('bg-rose-100', 'text-rose-950');
+                icon.textContent = '💡';
+            }
+            text.textContent = msg;
+        }
+
+        function resetRecycleGame() {
+            playSound('pop');
+            sortedItemIds.clear();
+            selectedRecycleItemId = null;
+            document.getElementById('recycleFeedback').classList.add('hidden');
+            renderRecycleItems();
+        }
+
+        /* =========================================================
+           9. MINI QUIZ GAME (ภารกิจแยกพอลิเมอร์ - 8 Questions)
+           ========================================================= */
+        const QUIZ_QUESTIONS = [
+            {
+                category: 'จำแนกจากสิ่งของ',
+                emoji: '🚰',
+                question: 'ท่อประปาสีฟ้า (PVC) มีความแข็งแรง เหนียว และเรียงตัวเป็นสายโซ่ชิดกัน จัดเป็นพอลิเมอร์โครงสร้างแบบใด?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'แบบร่างแห (Cross-linked)'],
+                correctIdx: 0,
+                explanation: 'PVC เป็นพอลิเมอร์แบบเส้น สายโซ่เรียงชิดกันมากจึงมีความแข็งแรง เหนียว และเป็นเทอร์มอพลาสติก'
+            },
+            {
+                category: 'จำแนกจากสิ่งของ',
+                emoji: '🛍️',
+                question: 'ถุงเย็นใส่อาหาร (LDPE) มีลักษณะอ่อนนุ่ม ยืดหยุ่นดี ความหนาแน่นต่ำ เป็นพอลิเมอร์แบบใด?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'แบบร่างแห (Cross-linked)'],
+                correctIdx: 1,
+                explanation: 'LDPE มีโครงสร้างแบบกิ่ง กิ่งด้านข้างช่วยกั้นไม่ให้สายโซ่ชิดกัน จึงนิ่ม ยืดหยุ่น และจุดหลอมเหลวต่ำ'
+            },
+            {
+                category: 'จำแนกจากสิ่งของ',
+                emoji: '🍽️',
+                question: 'จานและชามเมลามีน (Melamine) ทนความร้อนได้ดี คงรูป ไม่หลอมเหลวเมื่อโดนน้ำแกงร้อนๆ เป็นแบบใด?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'แบบร่างแห (Cross-linked)'],
+                correctIdx: 2,
+                explanation: 'เมลามีนมีโครงสร้างแบบร่างแห (เทอร์มอเซต) พันธะเชื่อมขวางยึดสายโซ่ไว้แน่นจึงคงรูปและทนความร้อนสูง'
+            },
+            {
+                category: 'สมบัติทางความร้อน',
+                emoji: '♻️',
+                question: 'พอลิเมอร์โครงสร้างแบบใดที่เมื่อขึ้นรูปแล้ว "ไม่สามารถ" นำกลับมาหลอมเหลวเพื่อรีไซเคิลใหม่ได้?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'แบบร่างแห (Cross-linked)'],
+                correctIdx: 2,
+                explanation: 'พอลิเมอร์แบบร่างแหจัดเป็นเทอร์มอเซต เมื่อโดนความร้อนจัดจะไหม้และสลายตัว ไม่หลอมเหลว จึงหลอมรีไซเคิลไม่ได้'
+            },
+            {
+                category: 'จำแนกจากสิ่งของ',
+                emoji: '🍳',
+                question: 'ด้ามจับกระทะและหูหม้อที่ทำจาก "เบกาไลต์ (Bakelite)" ควรมีโครงสร้างพอลิเมอร์แบบใดเพื่อความปลอดภัย?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'แบบร่างแห (Cross-linked)'],
+                correctIdx: 2,
+                explanation: 'เบกาไลต์เป็นพอลิเมอร์แบบร่างแห ทนความร้อนสูง ไม่ละลายคามือเวลาทำอาหาร และเป็นฉนวนความร้อนที่ดี'
+            },
+            {
+                category: 'จำแนกจากสิ่งของ',
+                emoji: '🧴',
+                question: 'ขวดนมและถังน้ำพลาสติกสีขุ่น (HDPE) มีความหนาแน่นสูงกว่าถุงพลาสติกทั่วไป จัดเป็นโครงสร้างแบบใด?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'แบบร่างแห (Cross-linked)'],
+                correctIdx: 0,
+                explanation: 'HDPE (High-Density Polyethylene) เป็นพอลิเมอร์แบบเส้น สายโซ่เรียงตัวชิดกันเป็นระเบียบจึงมีความหนาแน่นสูง'
+            },
+            {
+                category: 'เปรียบเทียบสมบัติ',
+                emoji: '🔥',
+                question: 'ระหว่างพอลิเมอร์แบบเส้นกับแบบกิ่ง แบบใดที่มี "จุดหลอมเหลวต่ำกว่า" และอ่อนตัวได้ง่ายกว่าเมื่อโดนความร้อน?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'จุดหลอมเหลวเท่ากันทั้งคู่'],
+                correctIdx: 1,
+                explanation: 'แบบกิ่งมีช่องว่างระหว่างสายโซ่มาก แรงยึดเหนี่ยวระหว่างโมเลกุลน้อยกว่า จึงใช้ความร้อนน้อยกว่าในการทำให้หลอมเหลว'
+            },
+            {
+                category: 'การประยุกต์ใช้',
+                emoji: '🛞',
+                question: 'ยางรถยนต์ที่ผ่านกระบวนการวัลคาไนเซชัน (เติมกำมะถันเพื่อสร้างสะพานเชื่อมระหว่างสายโซ่ยาง) มีโครงสร้างแบบใด?',
+                options: ['แบบเส้น (Linear)', 'แบบกิ่ง (Branched)', 'แบบร่างแห (Cross-linked)'],
+                correctIdx: 2,
+                explanation: 'กำมะถันทำหน้าที่สร้างพันธะเชื่อมขวาง (Cross-link) ระหว่างสายโซ่ยาง ทำให้ยางรถยนต์คงรูป ทนความร้อน และยืดหยุ่นคืนตัวได้ดีเยี่ยม!'
+            }
+        ];
+
+        let quizIdx = 0;
+        let quizScore = 0;
+        let quizStreak = 0;
+        let quizBestStreak = 0;
+        let quizAnswered = false;
+
+        function loadQuizQuestion() {
+            const q = QUIZ_QUESTIONS[quizIdx];
+            quizAnswered = false;
+
+            document.getElementById('quizActiveView').classList.remove('hidden');
+            document.getElementById('quizResultView').classList.add('hidden');
+            document.getElementById('quizFeedbackBox').classList.add('hidden');
+
+            document.getElementById('quizScore').textContent = quizScore;
+            document.getElementById('quizStreak').textContent = quizStreak;
+            document.getElementById('quizProgressText').textContent = `ข้อที่ ${quizIdx + 1} จาก ${QUIZ_QUESTIONS.length}`;
+            const pct = Math.round(((quizIdx + 1) / QUIZ_QUESTIONS.length) * 100);
+            document.getElementById('quizProgressPercent').textContent = `${pct}%`;
+            document.getElementById('quizProgressBar').style.width = `${pct}%`;
+
+            document.getElementById('quizMascotBox').textContent = q.emoji;
+            document.getElementById('quizCategoryBadge').textContent = q.category;
+            document.getElementById('quizQuestionText').textContent = q.question;
+
+            const optGrid = document.getElementById('quizOptionsGrid');
+            const labels = ['ก.', 'ข.', 'ค.'];
+            optGrid.innerHTML = q.options.map((opt, i) => `
+                <button id="quizOpt-${i}" onclick="submitQuizAnswer(${i})" class="cartoon-btn bg-white hover:bg-sky-50 p-3.5 sm:p-4 text-left flex items-center gap-3 font-bold text-slate-800 text-sm sm:text-base">
+                    <span class="w-8 h-8 rounded-lg bg-slate-100 border-2 border-slate-800 flex items-center justify-center shrink-0">${labels[i]}</span>
+                    <span>${opt}</span>
+                </button>
+            `).join('');
+        }
+
+        function submitQuizAnswer(selectedIdx) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+
+            const q = QUIZ_QUESTIONS[quizIdx];
+            const isCorrect = selectedIdx === q.correctIdx;
+
+            q.options.forEach((_, i) => {
+                const btn = document.getElementById(`quizOpt-${i}`);
+                btn.disabled = true;
+                btn.classList.remove('bg-white', 'hover:bg-sky-50');
+                if (i === q.correctIdx) {
+                    btn.classList.add('bg-emerald-200', 'text-emerald-950');
+                } else if (i === selectedIdx && !isCorrect) {
+                    btn.classList.add('bg-rose-200', 'text-rose-950');
+                } else {
+                    btn.classList.add('bg-slate-50');
+                }
+            });
+
+            const fbBox = document.getElementById('quizFeedbackBox');
+            const fbIcon = document.getElementById('quizFeedbackIcon');
+            const fbTitle = document.getElementById('quizFeedbackTitle');
+            const fbDesc = document.getElementById('quizFeedbackDesc');
+
+            fbBox.classList.remove('hidden', 'bg-emerald-50', 'bg-rose-50');
+
+            if (isCorrect) {
+                playSound('correct');
+                quizScore += 1;
+                quizStreak += 1;
+                if (quizStreak > quizBestStreak) quizBestStreak = quizStreak;
+                fbBox.classList.add('bg-emerald-50');
+                fbIcon.textContent = '🎉';
+                fbTitle.textContent = 'เก่งมาก! ตอบถูกต้อง';
+                fbTitle.className = 'font-bold text-base sm:text-lg text-emerald-800';
+                document.getElementById('quizMascotBox').textContent = '🥳';
+            } else {
+                playSound('wrong');
+                quizStreak = 0;
+                fbBox.classList.add('bg-rose-50');
+                fbIcon.textContent = '💡';
+                fbTitle.textContent = `ยังไม่ถูกนะ! คำตอบคือ "${q.options[q.correctIdx]}"`;
+                fbTitle.className = 'font-bold text-base sm:text-lg text-rose-800';
+                document.getElementById('quizMascotBox').textContent = '🧐';
+            }
+
+            fbDesc.textContent = q.explanation;
+            document.getElementById('quizScore').textContent = quizScore;
+            document.getElementById('quizStreak').textContent = quizStreak;
+
+            const nextBtn = document.getElementById('quizNextBtn');
+            nextBtn.textContent = quizIdx === QUIZ_QUESTIONS.length - 1 ? 'ดูสรุปคะแนน 🏆' : 'ข้อต่อไป ➡️';
+        }
+
+        function nextQuizQuestion() {
+            playSound('pop');
+            quizIdx += 1;
+            if (quizIdx < QUIZ_QUESTIONS.length) {
+                loadQuizQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            playSound('correct');
+            document.getElementById('quizActiveView').classList.add('hidden');
+            document.getElementById('quizResultView').classList.remove('hidden');
+
+            document.getElementById('resultFinalScore').textContent = `${quizScore} / ${QUIZ_QUESTIONS.length}`;
+            document.getElementById('resultBestStreak').textContent = `🔥 ${quizBestStreak}`;
+            document.getElementById('resultSummaryText').textContent = `คุณทำคะแนนได้ ${quizScore} เต็ม ${QUIZ_QUESTIONS.length} คะแนน`;
+
+            const titleEl = document.getElementById('resultRankTitle');
+            const trophyEl = document.getElementById('resultTrophy');
+            if (quizScore >= 7) {
+                trophyEl.textContent = '🏆';
+                titleEl.textContent = 'สุดยอดนักเคมีพอลิเมอร์!';
+            } else if (quizScore >= 5) {
+                trophyEl.textContent = '🌟';
+                titleEl.textContent = 'เก่งมาก! เข้าใจพอลิเมอร์ได้ดีเลย';
+            } else {
+                trophyEl.textContent = '🧪';
+                titleEl.textContent = 'ลองเข้าห้องทดลองทบทวนอีกนิดนะ!';
+            }
+
+            launchQuizConfetti();
+        }
+
+        function launchQuizConfetti() {
+            const container = document.getElementById('confettiContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            const colors = ['#38bdf8', '#34d399', '#fbbf24', '#fb7185', '#a78bfa', '#f97316'];
+            for (let i = 0; i < 36; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = `${Math.random() * 100}%`;
+                piece.style.backgroundColor = colors[i % colors.length];
+                piece.style.animationDelay = `${Math.random() * 0.65}s`;
+                piece.style.animationDuration = `${1.4 + Math.random() * 0.9}s`;
+                container.appendChild(piece);
+            }
+        }
+
+        function restartQuiz() {
+            playSound('pop');
+            quizIdx = 0;
+            quizScore = 0;
+            quizStreak = 0;
+            quizBestStreak = 0;
+            loadQuizQuestion();
+        }
+
+        /* =========================================================
+           10. INITIALIZATION ON WINDOW LOAD + RESIZE OBSERVER
+           ========================================================= */
+        window.onload = function () {
+            canvas = document.getElementById('polymerCanvas');
+            ctx = canvas.getContext('2d');
+
+            bCanvas = document.getElementById('builderCanvas');
+            bCtx = bCanvas.getContext('2d');
+
+            // Attach Pointer / Touch Events for Polymer Builder
+            bCanvas.addEventListener('mousedown', handleBuilderDown);
+            window.addEventListener('mousemove', handleBuilderMove);
+            window.addEventListener('mouseup', handleBuilderUp);
+
+            bCanvas.addEventListener('touchstart', handleBuilderDown, { passive: false });
+            bCanvas.addEventListener('touchmove', handleBuilderMove, { passive: false });
+            bCanvas.addEventListener('touchend', handleBuilderUp);
+
+            // Responsive ResizeObserver so switching tabs or rotating iPad/phone never bugs out
+            if (window.ResizeObserver) {
+                const ro = new ResizeObserver(() => {
+                    if (currentTab === 'lab') resizeCanvas();
+                    if (currentTab === 'builder') resizeBuilderCanvas();
+                });
+                ro.observe(document.getElementById('canvasContainer'));
+                ro.observe(document.getElementById('builderContainer'));
+            }
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                resizeBuilderCanvas();
+            });
+
+            resizeCanvas();
+            selectPolymer('linear');
+            renderRecycleItems();
+            loadQuizQuestion();
+            analyzeBuiltPolymer();
+
+            animateSimulation();
+        };
+    </script>
+</body>
+</html>
