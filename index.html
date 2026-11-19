@@ -19,17 +19,33 @@
             --font-body: 'Kanit', sans-serif;
         }
 
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         html, body {
             font-family: var(--font-body);
             background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fefce8 100%);
             min-height: 100vh;
             color: #1e293b;
             overflow-x: hidden;
-            max-width: 100vw;
+            max-width: 100%;
         }
 
         h1, h2, h3, h4, .font-cartoon {
             font-family: var(--font-display);
+        }
+
+        /* Mobile-first concise nav label sizing */
+        .nav-mobile-label {
+            font-size: clamp(10px, 2.8vw, 12px);
+            line-height: 1.2;
+        }
+
+        /* Smooth horizontal touch scrolling for tables */
+        .touch-scroll-x {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Hide scrollbar on horizontal nav bar while allowing smooth touch swipe */
@@ -144,7 +160,7 @@
         .sim-tank {
             position: relative;
             width: 100%;
-            height: 350px;
+            height: 300px;
             border: 3px solid #1e293b;
             border-radius: 1.25rem;
             overflow: hidden;
@@ -153,19 +169,23 @@
             transition: height 0.3s ease;
         }
 
+        .sim-tank.projector-tall {
+            height: 400px;
+        }
+
         @media (min-width: 768px) {
             .sim-tank {
-                height: 410px;
+                height: 380px;
             }
             .sim-tank.projector-tall {
-                height: 520px;
+                height: 500px;
             }
         }
 
         .builder-tank {
             position: relative;
             width: 100%;
-            height: 370px;
+            height: 320px;
             border: 3px solid #1e293b;
             border-radius: 1.25rem;
             overflow: hidden;
@@ -178,7 +198,7 @@
 
         @media (min-width: 768px) {
             .builder-tank {
-                height: 430px;
+                height: 410px;
             }
         }
 
@@ -219,70 +239,34 @@
 <body class="pb-12">
 
     <!-- =========================================================
-         HEADER: Phatthana Lab Branding + Sound & Projector Controls
+         MAIN NAVIGATION TABS (5 Learning Modes - Mobile-First 5-Col Grid)
          ========================================================= -->
-    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-4 border-slate-800 shadow-sm">
-        <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
-            <!-- Brand Mascot & Title -->
-            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-sky-100 border-3 border-slate-800 flex items-center justify-center shadow-[0_3px_0_#1e293b] animate-float p-1.5 shrink-0">
-                    <!-- Cute Cartoon Science Flask Mascot SVG -->
-                    <svg viewBox="0 0 64 64" class="w-10 h-10 sm:w-11 sm:h-11" aria-label="Phatthana Lab Mascot">
-                        <ellipse cx="32" cy="34" rx="26" ry="10" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4 3" transform="rotate(-18 32 34)"/>
-                        <path d="M25 12 H39 V22 L51 46 C53 50 50 55 45 55 H19 C14 55 11 50 13 46 L25 22 Z" fill="#ffffff" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
-                        <path d="M18 39 Q25 35 32 39 T46 39 L49 46 C50.5 49 48.5 52.5 45 52.5 H19 C15.5 52.5 13.5 49 15 46 Z" fill="#34d399"/>
-                        <circle cx="26" cy="43" r="2.2" fill="#1e293b"/>
-                        <circle cx="38" cy="43" r="2.2" fill="#1e293b"/>
-                        <circle cx="22.5" cy="45.5" r="2" fill="#fb7185" opacity="0.7"/>
-                        <circle cx="41.5" cy="45.5" r="2" fill="#fb7185" opacity="0.7"/>
-                        <path d="M29 45 Q32 48.5 35 45" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
-                        <circle cx="31" cy="28" r="2.5" fill="#fde047" stroke="#1e293b" stroke-width="1.5"/>
-                        <circle cx="36" cy="18" r="2" fill="#38bdf8" stroke="#1e293b" stroke-width="1.5"/>
-                        <rect x="22" y="9" width="20" height="4.5" rx="2.2" fill="#fde047" stroke="#1e293b" stroke-width="2.5"/>
-                    </svg>
-                </div>
-                <div class="truncate">
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight leading-none truncate">Phatthana Lab</h1>
-                        </div>
-                    <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5 truncate">สื่อช่วยสอนเรื่องโครงสร้างและสมบัติของพอลิเมอร์</p>
-                </div>
-            </div>
-
-            <!-- Action Controls -->
-            <div class="flex items-center gap-2 shrink-0">
-                <button id="soundToggleBtn" onclick="toggleSound()" class="cartoon-btn bg-amber-100 hover:bg-amber-200 px-3 py-2 flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-800" title="เปิด/ปิดเสียงเอฟเฟกต์">
-                    <span id="soundIcon" class="text-base sm:text-lg">🔊</span>
-                    <span id="soundLabel" class="hidden sm:inline">เสียง: เปิด</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- =========================================================
-         MAIN NAVIGATION TABS (5 Learning Modes - Touch Scrollable)
-         ========================================================= -->
-    <nav class="max-w-6xl mx-auto px-3 sm:px-4 mt-4">
-        <div class="flex md:grid md:grid-cols-5 gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-2 pt-1">
-            <button id="tabBtn-lab" onclick="switchTab('lab')" class="cartoon-btn tab-active bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
-                <span class="text-lg">🧪</span>
-                <span>1. ห้องทดลอง</span>
+    <nav class="max-w-6xl mx-auto px-2.5 sm:px-4 mt-3 sm:mt-4">
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-2 md:gap-3 pt-1 pb-1">
+            <button id="tabBtn-lab" onclick="switchTab('lab')" class="cartoon-btn tab-active bg-white px-1 sm:px-2 md:px-3 py-2 md:py-2.5 min-w-0 flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-1.5 font-bold whitespace-nowrap">
+                <span class="text-base sm:text-lg leading-none">🧪</span>
+                <span class="md:hidden nav-mobile-label whitespace-nowrap">ทดลอง</span>
+                <span class="hidden md:inline text-xs lg:text-sm whitespace-nowrap">1. ห้องทดลอง</span>
             </button>
-            <button id="tabBtn-builder" onclick="switchTab('builder')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
-                <span class="text-lg">🧬</span>
-                <span>2. ต่อโมเลกุลเอง</span>
+            <button id="tabBtn-builder" onclick="switchTab('builder')" class="cartoon-btn bg-white px-1 sm:px-2 md:px-3 py-2 md:py-2.5 min-w-0 flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-1.5 font-bold whitespace-nowrap">
+                <span class="text-base sm:text-lg leading-none">🧬</span>
+                <span class="md:hidden nav-mobile-label whitespace-nowrap">ต่อเอง</span>
+                <span class="hidden md:inline text-xs lg:text-sm whitespace-nowrap">2. ต่อโมเลกุลเอง</span>
             </button>
-            <button id="tabBtn-recycle" onclick="switchTab('recycle')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
-                <span class="text-lg">♻️</span>
-                <span>3. แยกขยะพอลิเมอร์</span>
+            <button id="tabBtn-recycle" onclick="switchTab('recycle')" class="cartoon-btn bg-white px-1 sm:px-2 md:px-3 py-2 md:py-2.5 min-w-0 flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-1.5 font-bold whitespace-nowrap">
+                <span class="text-base sm:text-lg leading-none">♻️</span>
+                <span class="md:hidden nav-mobile-label whitespace-nowrap">แยกขยะ</span>
+                <span class="hidden md:inline text-xs lg:text-sm whitespace-nowrap">3. แยกขยะพอลิเมอร์</span>
             </button>
-            <button id="tabBtn-compare" onclick="switchTab('compare')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
-                <span class="text-lg">📊</span>
-                <span>4. ตารางเปรียบเทียบ</span>
+            <button id="tabBtn-compare" onclick="switchTab('compare')" class="cartoon-btn bg-white px-1 sm:px-2 md:px-3 py-2 md:py-2.5 min-w-0 flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-1.5 font-bold whitespace-nowrap">
+                <span class="text-base sm:text-lg leading-none">📊</span>
+                <span class="md:hidden nav-mobile-label whitespace-nowrap">ตาราง</span>
+                <span class="hidden md:inline text-xs lg:text-sm whitespace-nowrap">4. ตารางเปรียบเทียบ</span>
             </button>
-            <button id="tabBtn-quiz" onclick="switchTab('quiz')" class="cartoon-btn bg-white px-3.5 py-2.5 shrink-0 flex items-center justify-center gap-2 font-bold text-xs sm:text-sm">
-                <span class="text-lg">🎮</span>
-                <span>5. ควิซท้าทาย</span>
+            <button id="tabBtn-quiz" onclick="switchTab('quiz')" class="cartoon-btn bg-white px-1 sm:px-2 md:px-3 py-2 md:py-2.5 min-w-0 flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-1.5 font-bold whitespace-nowrap">
+                <span class="text-base sm:text-lg leading-none">🎮</span>
+                <span class="md:hidden nav-mobile-label whitespace-nowrap">ควิซ</span>
+                <span class="hidden md:inline text-xs lg:text-sm whitespace-nowrap">5. ควิซท้าทาย</span>
             </button>
         </div>
     </nav>
@@ -290,30 +274,165 @@
     <!-- =========================================================
          MAIN CONTENT CONTAINER
          ========================================================= -->
-    <main class="max-w-6xl mx-auto px-3 sm:px-4 mt-4">
+    <main class="max-w-6xl mx-auto px-2.5 sm:px-4 mt-3 sm:mt-4">
 
         <!-- =====================================================
              TAB 1: ห้องทดลองจำลอง (Interactive Polymer Lab + Custom Polymer Support)
              ===================================================== -->
-        <section id="section-lab" class="space-y-5">
+        <section id="section-lab" class="space-y-4 sm:space-y-5">
             <!-- Polymer Type Selector + Teacher Presentation Controls -->
-            <div class="cartoon-card p-4 sm:p-5 bg-white">
+            <div class="cartoon-card p-3.5 sm:p-5 bg-white">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 mb-3">
-                    <div>
-                        <h2 class="text-base sm:text-xl font-bold text-slate-800 flex items-center gap-2">
-                            <span>🔬</span> เลือกโครงสร้างพอลิเมอร์ที่ต้องการทดลอง
+                    <div class="min-w-0">
+                        <h2 class="text-base sm:text-xl font-bold text-slate-800 flex items-center gap-1.5">
+                            <span>🔬</span> <span class="truncate">เลือกโครงสร้างพอลิเมอร์ที่ต้องการทดลอง</span>
                         </h2>
                         <p class="text-xs text-slate-500">เลือกแบบมาตรฐาน 3 แบบ หรือทดลองโมเลกุลที่คุณต่อเองจากแท็บ 2</p>
                     </div>
-                    <!-- Teacher Presentation Mode Buttons -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button id="hideAnswerBtn" onclick="toggleHideAnswers()" class="cartoon-btn bg-amber-100 hover:bg-amber-200 px-3 py-1.5 text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <!-- Teacher Presentation Mode Buttons (2-col fit on mobile, inline on desktop) -->
+                    <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full md:w-auto">
+                        <button id="hideAnswerBtn" onclick="toggleHideAnswers()" class="cartoon-btn bg-amber-100 hover:bg-amber-200 px-2.5 sm:px-3 py-2 sm:py-1.5 text-xs font-bold text-slate-800 flex items-center justify-center gap-1 whitespace-nowrap">
                             <span id="hideAnswerIcon">👁️</span>
-                            <span id="hideAnswerText">ซ่อนเฉลย (ทายผล)</span>
+                            <span id="hideAnswerText" class="truncate">ซ่อนเฉลย (ทายผล)</span>
                         </button>
-                        <button id="projectorBtn" onclick="toggleProjectorMode()" class="cartoon-btn bg-indigo-100 hover:bg-indigo-200 px-3 py-1.5 text-xs font-bold text-indigo-950 flex items-center gap-1.5">
+                        <button id="projectorBtn" onclick="toggleProjectorMode()" class="cartoon-btn bg-indigo-100 hover:bg-indigo-200 px-2.5 sm:px-3 py-2 sm:py-1.5 text-xs font-bold text-indigo-950 flex items-center justify-center gap-1 whitespace-nowrap">
                             <span>📽️</span>
-                            <span id="projectorText">โหมดสอนหน้าชั้น</span>
+                            <span id="projectorText" class="truncate">โหมดสอนหน้าชั้น</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Polymer Buttons Grid (2-col on Mobile Portrait, 3-4 col on larger screens) -->
+                <div id="labSelectorGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                    <!-- Linear -->
+                    <button id="polyBtn-linear" onclick="selectPolymer('linear')" class="cartoon-btn bg-sky-200 p-2 sm:p-3 text-left flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-white border-2 border-slate-800 flex items-center justify-center shrink-0">
+                            <svg viewBox="0 0 40 40" class="w-7 h-7 sm:w-8 sm:h-8">
+                                <line x1="4" y1="14" x2="36" y2="14" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+                                <circle cx="10" cy="14" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="14" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="30" cy="14" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <line x1="4" y1="26" x2="36" y2="26" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+                                <circle cx="10" cy="26" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="26" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="30" cy="26" r="4" fill="#38bdf8" stroke="#1e293b" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="font-bold text-slate-900 text-xs sm:text-base truncate">1. แบบเส้น</div>
+                            <div class="text-[11px] sm:text-xs text-slate-700 truncate">HDPE, PVC, ไนลอน</div>
+                        </div>
+                    </button>
+
+                    <!-- Branched -->
+                    <button id="polyBtn-branched" onclick="selectPolymer('branched')" class="cartoon-btn bg-white hover:bg-emerald-50 p-2 sm:p-3 text-left flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-white border-2 border-slate-800 flex items-center justify-center shrink-0">
+                            <svg viewBox="0 0 40 40" class="w-7 h-7 sm:w-8 sm:h-8">
+                                <line x1="4" y1="22" x2="36" y2="22" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
+                                <line x1="20" y1="22" x2="20" y2="10" stroke="#059669" stroke-width="3.5" stroke-linecap="round"/>
+                                <line x1="29" y1="22" x2="33" y2="32" stroke="#059669" stroke-width="3.5" stroke-linecap="round"/>
+                                <circle cx="10" cy="22" r="4" fill="#34d399" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="22" r="4" fill="#34d399" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="30" cy="22" r="4" fill="#34d399" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="20" cy="11" r="3.6" fill="#6ee7b7" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="33" cy="32" r="3.6" fill="#6ee7b7" stroke="#1e293b" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="font-bold text-slate-900 text-xs sm:text-base truncate">2. แบบกิ่ง</div>
+                            <div class="text-[11px] sm:text-xs text-slate-700 truncate">LDPE, ถุงเย็น, ฟิล์ม</div>
+                        </div>
+                    </button>
+
+                    <!-- Cross-linked -->
+                    <button id="polyBtn-crosslinked" onclick="selectPolymer('crosslinked')" class="cartoon-btn bg-white hover:bg-purple-50 p-2 sm:p-3 text-left flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-white border-2 border-slate-800 flex items-center justify-center shrink-0">
+                            <svg viewBox="0 0 40 40" class="w-7 h-7 sm:w-8 sm:h-8">
+                                <line x1="6" y1="12" x2="34" y2="12" stroke="#7c3aed" stroke-width="3.5"/>
+                                <line x1="6" y1="28" x2="34" y2="28" stroke="#7c3aed" stroke-width="3.5"/>
+                                <line x1="13" y1="12" x2="13" y2="28" stroke="#f59e0b" stroke-width="3.5"/>
+                                <line x1="27" y1="12" x2="27" y2="28" stroke="#f59e0b" stroke-width="3.5"/>
+                                <circle cx="13" cy="12" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="27" cy="12" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="13" cy="28" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                                <circle cx="27" cy="28" r="4" fill="#a78bfa" stroke="#1e293b" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="font-bold text-slate-900 text-xs sm:text-base truncate">3. แบบร่างแห</div>
+                            <div class="text-[11px] sm:text-xs text-slate-700 truncate">เมลามีน, เบกาไลต์</div>
+                        </div>
+                    </button>
+
+                    <!-- 4th Button: Custom Built Polymer (Shown when user creates one in Builder) -->
+                    <button id="polyBtn-custom" onclick="selectPolymer('custom')" class="hidden cartoon-btn bg-white hover:bg-amber-50 p-2 sm:p-3 text-left flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-300 border-2 border-slate-800 flex items-center justify-center shrink-0 text-xl sm:text-2xl">
+                            🧬
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="font-bold text-slate-900 text-xs sm:text-base truncate">4. ของคุณเอง!</div>
+                            <div id="customBtnSubtitle" class="text-[11px] sm:text-xs text-amber-800 font-semibold truncate">โครงสร้างที่ต่อเอง</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Workspace: Left Simulation Canvas + Controls, Right Live Dashboard -->
+            <div id="labWorkspaceGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
+
+                <!-- LEFT COLUMN: Simulation Tank & Interactive Controls -->
+                <div id="labTankCol" class="lg:col-span-7 cartoon-card p-3.5 sm:p-5 bg-white space-y-3.5 sm:space-y-4">
+                    <div class="flex flex-nowrap items-center justify-between gap-2">
+                        <h3 id="simTitle" class="font-bold text-slate-900 flex-1 min-w-0 truncate" style="font-size: clamp(0.82rem, 2.5vw, 1.125rem);">
+                            🔬 ตู้จำลองโมเลกุล: พอลิเมอร์แบบเส้น
+                        </h3>
+                        <span id="simStateBadge" class="shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-100 text-sky-900">
+                            ❄️ สถานะ: ของแข็ง
+                        </span>
+                    </div>
+
+                    <!-- Interactive 2D Canvas Tank -->
+                    <div class="sim-tank" id="canvasContainer">
+                        <canvas id="polymerCanvas"></canvas>
+                    </div>
+
+                    <!-- Temperature & Stretch Controls -->
+                    <div class="bg-slate-50 border-2 border-slate-800 rounded-2xl p-3 sm:p-4 space-y-3">
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="tempSlider" class="font-bold text-slate-800 flex items-center gap-1 text-xs sm:text-base">
+                                    🌡️ ควบคุมอุณหภูมิ (Heat Control)
+                                </label>
+                                <span id="tempReadout" class="font-cartoon font-bold text-sm sm:text-xl px-2.5 sm:px-3 py-0.5 rounded-xl bg-sky-200 border-2 border-slate-800 text-slate-900">
+                                    25°C
+                                </span>
+                            </div>
+                            <input type="range" id="tempSlider" min="25" max="300" value="25" step="1" class="temp-slider w-full" oninput="onTemperatureChange(this.value)">
+                            <div class="flex justify-between text-[11px] sm:text-xs font-semibold text-slate-500 mt-1 px-0.5">
+                                <span>25°C (เย็น)</span>
+                                <span>150°C (ร้อน)</span>
+                                <span>300°C (ไฟสีฟ้า!)</span>
+                            </div>
+                        </div>
+
+                        <!-- Preset Temp Buttons (4-col equal fit) + Stretch Test Button -->
+                        <div class="grid grid-cols-4 gap-1.5 sm:gap-2">
+                            <button onclick="setTemperature(25)" class="cartoon-btn bg-sky-100 hover:bg-sky-200 px-1 py-2 text-[11px] sm:text-sm font-bold text-slate-800 whitespace-nowrap">
+                                ❄️ 25°C
+                            </button>
+                            <button onclick="setTemperature(120)" class="cartoon-btn bg-amber-100 hover:bg-amber-200 px-1 py-2 text-[11px] sm:text-sm font-bold text-slate-800 whitespace-nowrap">
+                                🌡️ 120°C
+                            </button>
+                            <button onclick="setTemperature(220)" class="cartoon-btn bg-orange-200 hover:bg-orange-300 px-1 py-2 text-[11px] sm:text-sm font-bold text-slate-800 whitespace-nowrap">
+                                🔥 220°C
+                            </button>
+                            <button onclick="setTemperature(280)" class="cartoon-btn bg-rose-200 hover:bg-rose-300 px-1 py-2 text-[11px] sm:text-sm font-bold text-slate-800 whitespace-nowrap">
+                                🌋 280°C
+                            </button>
+                        </div>
+                        <button id="stretchBtn" onclick="triggerStretchTest()" class="cartoon-btn w-full bg-violet-200 hover:bg-violet-300 py-2.5 px-3 text-xs sm:text-sm font-bold text-slate-900 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                            <span>💪</span>
+                            <span>ทดสอบแรงดึง (Stretch Test)</span>
                         </button>
                     </div>
                 </div>
@@ -539,42 +658,45 @@
         <!-- =====================================================
              TAB 2: ต่อโมเลกุลเอง (Interactive Polymer Builder)
              ===================================================== -->
-        <section id="section-builder" class="hidden space-y-5 animate-pop">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <section id="section-builder" class="hidden space-y-4 sm:space-y-5 animate-pop">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
                 <!-- Left: Interactive Builder Canvas (8 cols) -->
-                <div class="lg:col-span-8 cartoon-card p-4 sm:p-5 bg-white space-y-3.5">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                            <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
-                                <span>🧬</span> ห้องปฏิบัติการต่อโมเลกุลเอง
+                <div class="lg:col-span-8 cartoon-card p-3.5 sm:p-5 bg-white space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <h2 class="text-base sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+                                <span>🧬</span> <span class="truncate">ห้องปฏิบัติการต่อโมเลกุลเอง</span>
                             </h2>
                             <p id="builderHintText" class="text-xs sm:text-sm text-slate-600">
-                                แตะที่พื้นที่ว่างเพื่อวางมอนอเมอร์ หรือลากมอนอเมอร์มาต่อแขนกัน!
+                                แตะที่พื้นที่ว่างเพื่อวางมอนอเมอร์ หรือเลือกเครื่องมือเชื่อมพันธะด้านล่าง!
                             </p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="loadBuilderStarterPreset()" class="cartoon-btn bg-sky-100 hover:bg-sky-200 px-3 py-1.5 text-xs font-bold text-sky-950">
+                        <div class="grid grid-cols-2 sm:flex items-center gap-2 shrink-0">
+                            <button onclick="loadBuilderStarterPreset()" class="cartoon-btn bg-sky-100 hover:bg-sky-200 px-2.5 py-2 sm:py-1.5 text-xs font-bold text-sky-950 whitespace-nowrap">
                                 ✨ วางโซ่ตัวอย่าง
                             </button>
-                            <button onclick="clearBuilder()" class="cartoon-btn bg-rose-100 hover:bg-rose-200 px-3 py-1.5 text-xs font-bold text-rose-900">
+                            <button onclick="clearBuilder()" class="cartoon-btn bg-rose-100 hover:bg-rose-200 px-2.5 py-2 sm:py-1.5 text-xs font-bold text-rose-900 whitespace-nowrap">
                                 🗑️ ล้างกระดาน
                             </button>
                         </div>
                     </div>
 
-                    <!-- Tool Mode Selector -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <button id="bTool-add" onclick="setBuilderTool('add')" class="cartoon-btn bg-sky-200 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
-                            <span>➕</span> วาง / ย้ายตัว
+                    <!-- Tool Mode Selector (3-col on mobile portrait, 5-col on sm+ — zero overflow) -->
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
+                        <button id="bTool-add" onclick="setBuilderTool('add')" class="cartoon-btn bg-sky-200 px-1.5 py-2 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 whitespace-nowrap min-w-0">
+                            <span>➕</span> <span class="truncate">วางตัว</span>
                         </button>
-                        <button id="bTool-bond" onclick="setBuilderTool('bond')" class="cartoon-btn bg-white hover:bg-emerald-50 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
-                            <span>🔗</span> เชื่อมสายโซ่
+                        <button id="bTool-bond" onclick="setBuilderTool('bond')" class="cartoon-btn bg-white hover:bg-emerald-50 px-1.5 py-2 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 whitespace-nowrap min-w-0">
+                            <span>🔗</span> <span class="truncate">เชื่อมโซ่</span>
                         </button>
-                        <button id="bTool-sulfur" onclick="setBuilderTool('sulfur')" class="cartoon-btn bg-white hover:bg-amber-50 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
-                            <span>⚡</span> สะพานกำมะถัน
+                        <button id="bTool-sulfur" onclick="setBuilderTool('sulfur')" class="cartoon-btn bg-white hover:bg-amber-50 px-1.5 py-2 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 whitespace-nowrap min-w-0">
+                            <span>⚡</span> <span class="truncate">กำมะถัน</span>
                         </button>
-                        <button id="bTool-delete" onclick="setBuilderTool('delete')" class="cartoon-btn bg-white hover:bg-rose-50 p-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5">
-                            <span>❌</span> ลบจุด/เส้น
+                        <button id="bTool-move" onclick="setBuilderTool('move')" class="cartoon-btn bg-white hover:bg-violet-50 px-1.5 py-2 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 whitespace-nowrap min-w-0">
+                            <span>✋</span> <span class="truncate">ลากย้าย</span>
+                        </button>
+                        <button id="bTool-delete" onclick="setBuilderTool('delete')" class="cartoon-btn bg-white hover:bg-rose-50 px-1.5 py-2 text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1 whitespace-nowrap min-w-0 col-span-2 sm:col-span-1">
+                            <span>❌</span> <span class="truncate">ลบจุด/เส้น</span>
                         </button>
                     </div>
 
@@ -654,9 +776,9 @@
                 </div>
 
                 <!-- Items Tray -->
-                <div id="recycleTrayContainer" class="bg-slate-50 border-2 border-slate-800 rounded-2xl p-3.5 sm:p-4">
-                    <div class="text-xs font-bold text-slate-500 mb-2.5">📦 สิ่งของที่รอการคัดแยก (แตะเพื่อเลือก หรือลากลงถัง):</div>
-                    <div id="recycleItemsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+                <div id="recycleTrayContainer" class="bg-slate-50 border-2 border-slate-800 rounded-2xl p-3 sm:p-4">
+                    <div class="text-xs font-bold text-slate-500 mb-2.5">📦 สิ่งของที่รอการคัดแยก (แตะเพื่อเลือก แล้วแตะถังด้านล่าง หรือลากลงถัง):</div>
+                    <div id="recycleItemsGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-2.5">
                         <!-- Generated by JS -->
                     </div>
                 </div>
@@ -793,11 +915,11 @@
             </div>
 
             <!-- Detailed Comparison Table -->
-            <div class="cartoon-card p-4 sm:p-6 bg-white overflow-hidden">
-                <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <div class="cartoon-card p-3.5 sm:p-6 bg-white overflow-hidden">
+                <h2 class="text-base sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4 flex items-center gap-2">
                     <span>📑</span> ตารางสรุปเปรียบเทียบพอลิเมอร์ทั้ง 3 แบบ
                 </h2>
-                <div class="overflow-x-auto rounded-2xl border-2 border-slate-800">
+                <div class="touch-scroll-x rounded-2xl border-2 border-slate-800">
                     <table class="w-full text-left border-collapse text-xs sm:text-base min-w-[600px]">
                         <thead>
                             <tr class="bg-slate-800 text-white">
@@ -1392,16 +1514,16 @@
 
             if (stretchTimer > 0) {
                 if (bType === 'linear') {
-                    badge.textContent = '↔️ ทดสอบแรงดึง: เหนียว แข็งแรง!';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-200 text-slate-900';
+                    badge.textContent = '💪 เหนียว แข็งแรง!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-200 text-slate-900';
                     desc.textContent = prefix + 'โครงสร้างแบบเส้นเรียงตัวต่อเนื่องและมีแรงยึดเหนี่ยวระหว่างสายโซ่สูง จึงต้านแรงดึงได้ดี มีความเหนียวและยืดได้เล็กน้อยก่อนคืนรูป!';
                 } else if (bType === 'branched') {
-                    badge.textContent = '↔️ ทดสอบแรงดึง: ยืดหยุ่นสูงมาก!';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-emerald-200 text-slate-900';
+                    badge.textContent = '💪 ยืดหยุ่นสูงมาก!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-emerald-200 text-slate-900';
                     desc.textContent = prefix + 'กิ่งที่แตกแขนงออกมาทำให้เกิดช่องว่างระหว่างโมเลกุลมาก โครงสร้างจึงขยับและยืดออกได้ง่ายมาก (ยืดหยุ่นสูงเหมือนถุงเย็น LDPE)!';
                 } else {
-                    badge.textContent = '↔️ ทดสอบแรงดึง: แข็งแกร่ง คงรูป (แต่เปราะ)!';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-purple-200 text-slate-900';
+                    badge.textContent = '💪 แข็งแกร่ง คงรูป!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-purple-200 text-slate-900';
                     desc.textContent = prefix + 'สะพานกำมะถัน (Cross-link) ยึดตรึงมอนอเมอร์ไว้แน่นจนแทบไม่ขยับเลย! ทำให้คงรูปแข็งแกร่งมาก แต่ถ้ากระแทกแรงเกินไปจะแตกเปราะทันที';
                 }
                 return;
@@ -1409,45 +1531,45 @@
 
             if (bType === 'linear') {
                 if (temperature < 110) {
-                    badge.textContent = '❄️ สถานะ: ของแข็ง เรียงชิดเป็นระเบียบ';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-100 text-sky-900';
+                    badge.textContent = '❄️ ของแข็ง (เรียงชิด)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-sky-100 text-sky-900';
                     desc.textContent = prefix + 'ที่อุณหภูมิปกติ สายโซ่แบบเส้นเรียงตัวต่อเนื่องไม่มีกิ่งเกะกะ ทำให้เข้าชิดกันได้ดี มีความหนาแน่นสูง แข็งแรง และเหนียว';
                 } else if (temperature < 140) {
-                    badge.textContent = '🌡️ สถานะ: เริ่มอ่อนตัว';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-100 text-amber-900';
+                    badge.textContent = '🌡️ เริ่มอ่อนตัว';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-100 text-amber-900';
                     desc.textContent = prefix + 'เมื่อได้รับความร้อนเพิ่มขึ้น โมเลกุลเริ่มสั่นแรงขึ้นและแรงยึดเหนี่ยวระหว่างสายโซ่เริ่มลดลง เตรียมเข้าสู่จุดหลอมเหลว (~140°C)';
                 } else {
-                    badge.textContent = '🔥 สถานะ: หลอมเหลว (สายโซ่เลื่อนไถล)';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-rose-200 text-rose-900';
+                    badge.textContent = '🔥 หลอมเหลว (เลื่อนไถล)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-rose-200 text-rose-900';
                     desc.textContent = prefix + 'ร้อนเกินจุดหลอมเหลวแล้ว! เพราะไม่มีสะพานกำมะถันยึดไว้ มอนอเมอร์และสายโซ่จึงแยกเคลื่อนที่เลื่อนไถลผ่านกันได้ (หลอมเหลว) และนำมารีไซเคิลใหม่ได้!';
                 }
             } else if (bType === 'branched') {
                 if (temperature < 80) {
-                    badge.textContent = '❄️ สถานะ: ของแข็งอ่อนนุ่ม (มีกิ่งกั้น)';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-emerald-100 text-emerald-900';
+                    badge.textContent = '❄️ ของแข็งนุ่ม (มีกิ่ง)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-emerald-100 text-emerald-900';
                     desc.textContent = prefix + 'กิ่งก้านที่แตกแขนงออกมาคอยกั้นไม่ให้สายโซ่หลักเข้ามาชิดกันได้ ทำให้มีความหนาแน่นต่ำ อ่อนนุ่ม และยืดหยุ่นได้ดี';
                 } else if (temperature < 105) {
-                    badge.textContent = '🌡️ สถานะ: อ่อนตัวเร็วมาก';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-100 text-amber-900';
+                    badge.textContent = '🌡️ อ่อนตัวเร็วมาก';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-100 text-amber-900';
                     desc.textContent = prefix + 'เพราะมีช่องว่างระหว่างสายโซ่มากและแรงยึดเหนี่ยวต่ำ พอลิเมอร์แบบกิ่งจึงอ่อนตัวได้เร็วกว่าแบบเส้นมาก!';
                 } else {
-                    badge.textContent = '🔥 สถานะ: หลอมเหลวได้ง่าย (~105°C)';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-rose-200 text-rose-900';
+                    badge.textContent = '🔥 หลอมเหลวง่าย';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-rose-200 text-rose-900';
                     desc.textContent = prefix + 'หลอมเหลวแล้ว! เพราะไม่มีสะพานกำมะถันยึดตรึง มอนอเมอร์และกิ่งก้านจึงแยกออกจากกันและไหลเลื่อนได้ง่าย จัดเป็นเทอร์มอพลาสติกที่หลอมใหม่ได้!';
                 }
             } else {
                 // Cross-linked
                 if (temperature < 140) {
-                    badge.textContent = '🛡️ สถานะ: ของแข็งคงรูป (ล็อกแน่น 3 มิติ)';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-purple-100 text-purple-900';
+                    badge.textContent = '🛡️ ของแข็ง (ล็อกแน่น)';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-purple-100 text-purple-900';
                     desc.textContent = prefix + 'สะพานกำมะถัน (Cross-link) สีเหลืองทองยึดตรึงมอนอเมอร์เข้าด้วยกันเป็นโครงข่ายแข็งแรง ทำให้คงรูปดีเยี่ยมและทนความร้อนสูง';
                 } else if (temperature < 265) {
-                    badge.textContent = '💪 สถานะ: ทนความร้อน! ไม่หลอมเหลว';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-200 text-amber-900';
+                    badge.textContent = '💪 ทนร้อน! ไม่หลอมเหลว';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-amber-200 text-amber-900';
                     desc.textContent = prefix + 'สังเกตสิ! แม้เปลวไฟสีฟ้าจะร้อนแรงขนาดไหน โมเลกุลก็ "ไม่แยกออกจากกันและไม่หลอมเหลว" เพราะสะพานกำมะถันล็อกไว้แน่น!';
                 } else {
-                    badge.textContent = '💨 สถานะ: ไหม้เกรียม / สลายตัว!';
-                    badge.className = 'shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-slate-800 text-white';
+                    badge.textContent = '💨 ไหม้เกรียม / สลายตัว!';
+                    badge.className = 'shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 border-slate-800 bg-slate-800 text-white';
                     desc.textContent = prefix + 'ร้อนจัดเกิน 265°C แล้ว! พอลิเมอร์แบบร่างแห (เทอร์มอเซต) จะไม่หลอมเป็นของเหลว แต่จะเกิดรอยไหม้เกรียมและสลายตัวทันที จึงหลอมรีไซเคิลไม่ได้!';
                 }
             }
@@ -2412,18 +2534,21 @@
                 add: 'bg-sky-200',
                 bond: 'bg-emerald-200',
                 sulfur: 'bg-amber-200',
+                move: 'bg-violet-200',
                 delete: 'bg-rose-200'
             };
-            ['add', 'bond', 'sulfur', 'delete'].forEach(t => {
+            ['add', 'bond', 'sulfur', 'move', 'delete'].forEach(t => {
                 const btn = document.getElementById(`bTool-${t}`);
-                btn.classList.remove('bg-sky-200', 'bg-emerald-200', 'bg-amber-200', 'bg-rose-200', 'bg-white');
+                if (!btn) return;
+                btn.classList.remove('bg-sky-200', 'bg-emerald-200', 'bg-amber-200', 'bg-violet-200', 'bg-rose-200', 'bg-white');
                 btn.classList.add(t === tool ? colors[t] : 'bg-white');
             });
 
             const hints = {
-                add: 'แตะที่ว่างเพื่อวางมอนอเมอร์ใหม่ หรือแตะค้างแล้วลากเพื่อย้ายตำแหน่ง',
+                add: 'แตะที่ว่างเพื่อวางมอนอเมอร์ใหม่ (วางใกล้ตัวเดิมจะเชื่อมโซ่อัตโนมัติ)',
                 bond: 'แตะหรือลากจากมอนอเมอร์ตัวหนึ่งไปยังอีกตัวหนึ่ง เพื่อเชื่อมสายโซ่/ต่อกิ่ง',
                 sulfur: 'แตะหรือลากเชื่อมระหว่าง 2 สายโซ่ เพื่อสร้าง "สะพานกำมะถัน (Cross-link)"',
+                move: 'แตะค้างที่มอนอเมอร์แล้วลากเพื่อย้ายจัดตำแหน่งให้สวยงาม',
                 delete: 'แตะที่มอนอเมอร์หรือเส้นพันธะที่ต้องการลบออก'
             };
             document.getElementById('builderHintText').textContent = hints[tool];
@@ -2548,6 +2673,11 @@
                     playSound('pop');
                     bDraggingNode = newNode;
                     analyzeBuiltPolymer();
+                }
+            } else if (bTool === 'move') {
+                if (hitNode) {
+                    bDraggingNode = hitNode;
+                    playSound('pop');
                 }
             } else if (bTool === 'bond' || bTool === 'sulfur') {
                 if (hitNode) {
@@ -2838,7 +2968,7 @@
             const grid = document.getElementById('labSelectorGrid');
             customBtn.classList.remove('hidden');
             grid.classList.remove('sm:grid-cols-3');
-            grid.classList.add('sm:grid-cols-2', 'lg:grid-cols-4');
+            grid.classList.add('lg:grid-cols-4');
             document.getElementById('customBtnSubtitle').textContent =
                 `${typeLabel} (${nodeCount} ตัว, ${bondCount + sulfurCount} พันธะ)`;
 
@@ -2864,7 +2994,7 @@
             { id: 'r9', emoji: '🥡', name: 'กล่องอาหาร PP', bin: 'thermoplastic', reason: 'กล่องพอลิโพรพิลีน (PP) เป็นเทอร์มอพลาสติก รีไซเคิลได้!' },
             { id: 'r10', emoji: '🛞', name: 'ยางรถยนต์วัลคาไนซ์', bin: 'thermoset', reason: 'ยางรถยนต์มีสะพานกำมะถันเชื่อมขวางแบบร่างแห จึงหลอมเหลวซ้ำไม่ได้!' },
             { id: 'r11', emoji: '🍯', name: 'ขวดบีบซอส', bin: 'thermoplastic', reason: 'ขวดบีบซอสทำจาก LDPE แบบกิ่ง ยืดหยุ่นและหลอมรีไซเคิลได้!' },
-            { id: 'r12', emoji: '🪵', name: 'แผ่นลามิเนตเมลามีน', bin: 'thermoset', reason: 'แผ่นลามิเนตปิดผิวเฟอร์นิเจอร์ทำจากเรซินแบบร่างแห (เทอร์มอเซต)!' }
+            { id: 'r12', emoji: '🧵', name: 'เชือกไนลอน', bin: 'thermoplastic', reason: 'เชือกไนลอนเป็นพอลิเมอร์แบบเส้น เหนียว แข็งแรง และเป็นเทอร์มอพลาสติก!' }
         ];
 
         let sortedItemIds = new Set();
